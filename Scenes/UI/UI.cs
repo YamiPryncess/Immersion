@@ -48,14 +48,23 @@ public class UI : Control
     public void _on_PlayerLine_text_entered(string text) {
         if(text.Length > 0){
             currentLine = text.Split(" ");
-            if(currentLine[0] == "Insert") {
-                wordTrie.insert(currentLine[1]);
-            }
-            if(currentLine[0] == "Find") {
-                GD.Print(wordTrie.find(currentLine[1]));
-            }
-            if(currentLine[0] == "Delete") {
-                wordTrie.remove(currentLine[1]);
+            if(currentLine.Length > 1){
+                if(currentLine[0] == "Insert") {
+                    wordTrie.insert(currentLine[1]);
+                    GD.Print("Inserted: ", currentLine[1]);
+                }
+                if(currentLine[0] == "Find") {
+                    GD.Print("Found? ", wordTrie.find( currentLine[1]), ": ", currentLine[1]);
+                }
+                if(currentLine[0] == "Delete") {
+                    wordTrie.remove(currentLine[1]);
+                }
+                if(currentLine[0] == "Search") {
+                    List<string> predictedText = wordTrie.search(currentLine[1]);
+                    for(var i = 0; i < predictedText.Count; i++){
+                        GD.Print("Searched: ", predictedText[i]);
+                    }
+                }
             }
         }
     }

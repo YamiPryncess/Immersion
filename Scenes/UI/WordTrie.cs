@@ -40,7 +40,6 @@ public class WordTrie : Node{
     }
     public List<string> search(string subword) {
         TrieNode node = rootNode;
-        List<string> predictWords;
 
         for(int i = 0; i < subword.Length; i++) {
             char currentLetter = subword[i];
@@ -51,8 +50,7 @@ public class WordTrie : Node{
             }//perfect spelling. Aside from that only words that the tree knows about can be used.
         }//After getting up to the end of the subword we're going to get ALL words that follow.
         
-        predictWords = recursion(node, "");
-        return null;
+        return recursion(node, subword);
     }
 
     public List<string> recursion(TrieNode node, string word) {
