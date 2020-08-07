@@ -38,6 +38,34 @@ public class WordTrie : Node{
         }
         return true;
     }
+    public List<string> search(string subword) {
+        TrieNode node = rootNode;
+        List<string> predictWords;
+
+        for(int i = 0; i < subword.Length; i++) {
+            char currentLetter = subword[i];
+            if(node.children.ContainsKey(currentLetter)){
+                node = node.children[currentLetter];
+            } else {//If the player did not type anything that's familiar to the tree
+                return null;//Return null. This may be less strict eventually but for now it must be
+            }//perfect spelling. Aside from that only words that the tree knows about can be used.
+        }//After getting up to the end of the subword we're going to get ALL words that follow.
+        
+        predictWords = recursion(node, "");
+        return null;
+    }
+
+    public List<string> recursion(TrieNode node, string word) {
+        List<string> predictWords = new List<string>();
+        foreach(KeyValuePair<char, TrieNode> child in node.children) {
+            if(node.completeString) {
+                predictWords.Add(word);
+            }
+            recursion(child.Value, word + node.val.ToString());
+        }
+        return predictWords;
+    }
+
     public string remove(string word) {
         TrieNode node = rootNode;
         List<TrieNode> suffixes = new List<TrieNode>();
