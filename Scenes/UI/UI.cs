@@ -54,15 +54,20 @@ public class UI : Control
                     GD.Print("Inserted: ", currentLine[1]);
                 }
                 if(currentLine[0] == "Find") {
-                    GD.Print("Found? ", wordTrie.find( currentLine[1]), ": ", currentLine[1]);
+                    GD.Print("Found? ", currentLine[1], " = ", wordTrie.find( currentLine[1]));
                 }
                 if(currentLine[0] == "Delete") {
                     wordTrie.remove(currentLine[1]);
                 }
                 if(currentLine[0] == "Search") {
                     List<string> predictedText = wordTrie.search(currentLine[1]);
-                    for(var i = 0; i < predictedText.Count; i++){
-                        GD.Print("Searched: ", predictedText[i]);
+                    if(predictedText == null) {
+                        GD.Print("No searchable word follows from player's text.");
+                    } else {
+                        GD.Print("Search: ", currentLine[1]);
+                        for(var i = 0; i < predictedText.Count; i++){
+                            GD.Print("Searched: ", predictedText[i]);
+                        }
                     }
                 }
             }
