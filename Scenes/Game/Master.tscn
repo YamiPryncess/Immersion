@@ -1,0 +1,134 @@
+[gd_scene load_steps=13 format=2]
+
+[ext_resource path="res://Scenes/UI/WordTrie.cs" type="Script" id=1]
+[ext_resource path="res://Scenes/UI/UI.cs" type="Script" id=2]
+[ext_resource path="res://Scenes/Character/Character.tscn" type="PackedScene" id=3]
+[ext_resource path="res://Scenes/UI/InventoryUI.tscn" type="PackedScene" id=4]
+[ext_resource path="res://Scenes/Level/Flatplane.tscn" type="PackedScene" id=5]
+[ext_resource path="res://Scenes/Game/Master.cs" type="Script" id=6]
+
+[sub_resource type="CylinderShape" id=1]
+radius = 0.245709
+height = 0.0451286
+
+[sub_resource type="SpatialMaterial" id=2]
+albedo_color = Color( 0.980392, 0.945098, 0.00392157, 1 )
+
+[sub_resource type="CylinderMesh" id=3]
+material = SubResource( 2 )
+top_radius = 0.25
+bottom_radius = 0.25
+height = 0.05
+
+[sub_resource type="Skin" id=4]
+
+[sub_resource type="Theme" id=5]
+
+[sub_resource type="StyleBoxFlat" id=6]
+bg_color = Color( 0.0588235, 0.737255, 0.482353, 0.223529 )
+
+[node name="Master" type="Spatial"]
+script = ExtResource( 6 )
+
+[node name="Flatplane" parent="." instance=ExtResource( 5 )]
+
+[node name="Lynn" parent="Flatplane" instance=ExtResource( 3 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.31293, 0.347536, 0.372441 )
+collision_layer = 1
+
+[node name="FirstPerson" parent="Flatplane/Lynn/Camera" index="0"]
+cull_mask = 1048575
+current = true
+
+[node name="Alexia" parent="Flatplane" instance=ExtResource( 3 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.04535, 0.627925, -0.438894 )
+collision_layer = 2
+collision_mask = 3
+fullName = "AlexiaValentine"
+playState = 0
+
+[node name="ItemMaster" type="Node" parent="."]
+
+[node name="Food" type="Node" parent="ItemMaster"]
+
+[node name="Pizza" type="Area" parent="ItemMaster/Food"]
+collision_layer = 3
+
+[node name="CollisionShape" type="CollisionShape" parent="ItemMaster/Food/Pizza"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.639572, 0 )
+shape = SubResource( 1 )
+
+[node name="MeshInstance" type="MeshInstance" parent="ItemMaster/Food/Pizza/CollisionShape"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.390537, 0 )
+layers = 3
+mesh = SubResource( 3 )
+skin = SubResource( 4 )
+material/0 = null
+
+[node name="UI" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 0.308235
+margin_top = 0.131458
+margin_right = 0.308228
+margin_bottom = 0.13147
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="NinePatchRect" type="Panel" parent="UI"]
+visible = false
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = -183.0
+theme = SubResource( 5 )
+custom_styles/panel = SubResource( 6 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Feels" type="Panel" parent="UI/NinePatchRect"]
+visible = false
+anchor_bottom = 0.984
+margin_right = 191.0
+margin_bottom = -0.0720062
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="PlayerInv" parent="UI/NinePatchRect" instance=ExtResource( 4 )]
+visible = false
+anchor_left = 1.0
+anchor_top = 0.016
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -192.0
+margin_top = 0.0719998
+margin_right = 0.0
+margin_bottom = 0.0
+
+[node name="PlayerLine" type="LineEdit" parent="UI"]
+anchor_left = 0.191
+anchor_top = 1.0
+anchor_right = 0.812
+anchor_bottom = 1.0
+margin_left = -0.137558
+margin_top = -25.1033
+margin_right = -0.041626
+margin_bottom = -0.103271
+hint_tooltip = "lll"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="WordTrie" type="Node" parent="UI"]
+script = ExtResource( 1 )
+[connection signal="text_change_rejected" from="UI/PlayerLine" to="UI" method="_on_PlayerLine_text_change_rejected"]
+[connection signal="text_changed" from="UI/PlayerLine" to="UI" method="_on_PlayerLine_text_changed"]
+[connection signal="text_entered" from="UI/PlayerLine" to="UI" method="_on_PlayerLine_text_entered"]
+
+[editable path="Flatplane/Lynn"]
+
+[editable path="Flatplane/Alexia"]
