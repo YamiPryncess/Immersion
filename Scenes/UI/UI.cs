@@ -99,7 +99,8 @@ public class UI : Control
                         currentWord = currentLine[i];
                     }
                 }
-                stringSize = playerFont.GetStringSize(playerLine.Text.Substr(0, sentenceLengthTillWordAtCaret));
+                stringSize = playerFont.GetStringSize(playerLine.Text.Substr(0, sentenceLengthTillWordAtCaret + 1));
+                itemList.RectPosition = new Vector2(stringSize.x, itemList.RectPosition.y);
             }
         }
     }

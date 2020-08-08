@@ -124,14 +124,17 @@ __meta__ = {
 }
 
 [node name="ItemList" type="ItemList" parent="UI/PlayerLine"]
-anchor_left = 0.042
-anchor_top = -5.4
-anchor_right = 0.042
-anchor_bottom = -0.08
-margin_left = -0.711996
-margin_right = 83.288
-margin_bottom = 2.38419e-07
+anchor_right = 1.0
+margin_left = 0.200424
+margin_top = -133.268
+margin_right = -551.799
+margin_bottom = -0.267578
+grow_vertical = 0
+rect_scale = Vector2( 1.08, 1 )
 allow_rmb_select = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="WordTrie" type="Node" parent="UI"]
 script = ExtResource( 1 )
