@@ -13,6 +13,7 @@ public class UI : Control
     WordTrie wordTrie;
     string[] currentLine;
     Master master;
+    bool debug = false;
     public override void _Ready(){
         master = GetTree().Root.GetNode<Master>("Master");
         playerLine = (LineEdit)GetNode("PlayerLine");
@@ -44,10 +45,76 @@ public class UI : Control
     }
 
     public void _on_PlayerLine_text_changed(string text){
-        
+        Font playerFont = playerLine.GetFont("");
+        Vector2 stringSize = new Vector2();
+        List<int> wordCount = new List<int>();
+        int countInd = 0;
+        string newText = "";
+        bool space = true;
+        bool startCounting = true; //Skips the first space after each word
+        int caret = playerLine.CaretPosition;
+        int spacesTillCaret = 0;
+        int sentenceLengthTillWordAtCaret = 0;
+        string currentWord = "";
+
+        if(text.Length > 0){
+            currentLine = text.Split(" ");
+            if(currentLine.Length > 0){
+                //Count the text
+                for(var i = 0; i < text.Length; i++){
+                    if(text[i] != ' ' && space == true){
+                        //wordCount[countInd] = i;
+                        space = false;
+                    } else if(text[i] == ' ' && space == false) {
+                        space = true;
+                        startCounting = true;//Skip the first space after each word
+                        countInd++;
+                    } else if(startCounting == true) { //Only count beginning spaces and 2 spaces after each word.
+                        if(space == true && i < caret) {
+                            spacesTillCaret++;
+                        }
+                    }
+                }
+                //Space the Text
+                for(var i = 0; i < currentLine.Length; i++){
+                    if(i == 0){
+                        newText += currentLine[i];
+                    } else {
+                        newText += " " + currentLine[i];
+                    }
+                    
+                }
+                if(text[text.Length - 1] == ' '){
+                    newText += " ";
+                }
+                //Reset the text
+                playerLine.Text = newText;
+                playerLine.CaretPosition = caret - spacesTillCaret;
+                caret = playerLine.CaretPosition;
+                //Find the caret position and check what word it's on.
+                for(var i = 0; i < currentLine.Length; i++){
+                    if(sentenceLengthTillWordAtCaret + currentLine[i].Length + 1 < caret){
+                        sentenceLengthTillWordAtCaret += currentLine[i].Length + 1;
+                    } else {
+                        currentWord = currentLine[i];
+                    }
+                }
+                stringSize = playerFont.GetStringSize(playerLine.Text.Substr(0, sentenceLengthTillWordAtCaret));
+            }
+        }
     }
 
     public void _on_PlayerLine_text_entered(string text) {
+        if(debug == true) {
+            debugTrie(text);
+        }
+    }
+
+    public void _on_PlayerLine_text_change_rejected() {
+
+    }
+
+    public void debugTrie(string text) {
         if(text.Length > 0){
             currentLine = text.Split(" ");
             if(currentLine.Length > 1){
@@ -69,22 +136,12 @@ public class UI : Control
                         GD.Print("Search: ", currentLine[1]);
                         for(var i = predictedText.Count - 1; i >= 0; i--){
                             GD.Print("Searched: ", predictedText[i]);
-                            RichTextLabel child = new RichTextLabel();
-                            child.AddText(predictedText[i]);
-                            //itemList.AddChild(child); //This doesn't work. I'm learning about it now.
+                            itemList.AddItem(predictedText[i], null, true); //This doesn't work. I'm learning about it now.
                         }
                     }
                 }
             }
         }
-    }
-
-    public void _on_PlayerLine_text_change_rejected() {
-        //var string_size = font.get_string_size(text.substr(0, get_caret_position()))
-    }
-
-    public void debug() {
-
     }
 
 }
