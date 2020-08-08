@@ -17,7 +17,7 @@ public class WordTrie : Node{
             if(node.children.ContainsKey(currentLetter)){
                 node = node.children[currentLetter];
             } else {
-                TrieNode newNode = new TrieNode(currentLetter, i + 1);
+                TrieNode newNode = new TrieNode(currentLetter, i + 1, word.Substr(0, i + 1));
                 node.children.Add(currentLetter, newNode);
                 node = newNode;
             }
@@ -54,29 +54,29 @@ public class WordTrie : Node{
             predictWords.Add(subword);
         }
         List<TrieNode> queue = new List<TrieNode>();
-        return bFRecursion(node, subword, predictWords, queue);
+        return bFRecursion(node, predictWords, queue);
     }
-    public List<string> dFRecursion(TrieNode node, string word, List<string> predictWords) {
+    public List<string> dFRecursion(TrieNode node, List<string> predictWords) {
         foreach(KeyValuePair<char, TrieNode> child in node.children) { //Idk how consistent dictionary loops are.
             if(child.Value.completeString) { //This is probably unnecessary if I had an actual literal dictionary in the game that the player can just reference for what they currently typed.
-                predictWords.Add(word + child.Value.val); //Could be useful for finding all possible verbs or adjectives or nouns no matter what. I could have that pre-organized in a dictionary though.
+                predictWords.Add(child.Value.word); //Could be useful for finding all possible verbs or adjectives or nouns no matter what. I could have that pre-organized in a dictionary though.
             }
-            dFRecursion(child.Value, word + child.Value.val.ToString(), predictWords);
+            dFRecursion(child.Value, predictWords);
         }
         return predictWords;
     }
 
-    public List<string> bFRecursion(TrieNode node, string word, List<string> predictWords, List<TrieNode> queue, int depthLimit = 2, bool dip = false) {
-        List<string> unfinishedWords = new List<string>();
+    public List<string> bFRecursion(TrieNode node, List<string> predictWords, List<TrieNode> queue, int depthLimit = 3, bool dip = false, List<string> unfinishedWords = null) {
+        if(unfinishedWords == null) {
+            unfinishedWords = new List<string>();
+        }
         if((depthLimit > 0 || depthLimit == -1)){ //-1 for infinite depth
             foreach(KeyValuePair<char, TrieNode> child in node.children) {//Add ALL breadth of children in this depth
                 if(child.Value.completeString) {
-                    predictWords.Add(word + child.Value.val);
+                    predictWords.Add(child.Value.word);
+                } else if(depthLimit == 1) { //We can store unfinished paths in the last depth.
+                    unfinishedWords.Add(child.Value.word + "-");
                 }
-                
-                else if(depthLimit == 1) { //We can store unfinished paths in the last depth.
-                    unfinishedWords.Add(word + " " + child.Value.val + "-"); //This part isn't working
-                }//But everythign else seems to be working though.
                 
                 if(child.Value.children.Count > 0){
                     queue.Add(child.Value);
@@ -84,7 +84,7 @@ public class WordTrie : Node{
             }
             if(!dip) {
                 for(var i = 0; i < queue.Count; i++) {
-                    bFRecursion(queue[i], word + queue[i].val, predictWords, queue, Mathf.Max(0, depthLimit - (queue[i].depth - node.depth)), true);
+                    bFRecursion(queue[i], predictWords, queue, Mathf.Max(0, depthLimit - (queue[i].depth - node.depth)), true, unfinishedWords);
                 }
                 if (unfinishedWords.Count > 0){
                     for(var i = 0; i < unfinishedWords.Count; i++){
@@ -135,10 +135,12 @@ public class TrieNode {
     public Dictionary<char, TrieNode> children;
     public bool completeString;
     public int depth = 0;
+    public string word = "";
 
-    public TrieNode(char letter = ' ', int _depth = 0){
+    public TrieNode(char letter = ' ', int _depth = 0, string _word = ""){
         val = letter;
         depth = _depth;
+        word = _word;
         children = new Dictionary<char, TrieNode>();
         completeString = false;
     }

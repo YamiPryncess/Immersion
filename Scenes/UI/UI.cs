@@ -9,12 +9,14 @@ public class UI : Control
 
     // Called when the node enters the scene tree for the first time.
     LineEdit playerLine;
+    ItemList itemList;
     WordTrie wordTrie;
     string[] currentLine;
     Master master;
     public override void _Ready(){
         master = GetTree().Root.GetNode<Master>("Master");
         playerLine = (LineEdit)GetNode("PlayerLine");
+        itemList = (ItemList)GetNode("PlayerLine/ItemList");
         wordTrie = GetNode<WordTrie>("WordTrie");
     }
 
@@ -65,8 +67,11 @@ public class UI : Control
                         GD.Print("No searchable word follows from player's text.");
                     } else {
                         GD.Print("Search: ", currentLine[1]);
-                        for(var i = 0; i < predictedText.Count; i++){
+                        for(var i = predictedText.Count - 1; i >= 0; i--){
                             GD.Print("Searched: ", predictedText[i]);
+                            RichTextLabel child = new RichTextLabel();
+                            child.AddText(predictedText[i]);
+                            //itemList.AddChild(child); //This doesn't work. I'm learning about it now.
                         }
                     }
                 }
