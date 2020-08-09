@@ -19,6 +19,18 @@ public class UI : Control
         playerLine = (LineEdit)GetNode("PlayerLine");
         itemList = (ItemList)GetNode("PlayerLine/ItemList");
         wordTrie = GetNode<WordTrie>("WordTrie");
+        string[] words = new string[]{"i", "a", "may", "pizza", "food", "love", "lose",
+        "let", "lets", "loves", "lover", "give", "me", "have", "no", "yes", "want", 
+        "need", "desire", "never", "look", "loss", "loser", "loveliest", "else", "tell", "me",
+        "know", "feel", "hunger", "table", "worship", "stay", "with", "my", "loveliest", "lovely",
+        "kill", "killing", "kills", "harsh", "kind", "great", "create", "move", "sister", "brother",
+        "mom", "dad", "heal", "cherish", "nevermind", "master", "lord", "break", "romance", "happy",
+        "sad", "fear", "up", "down", "depressed", "angry", "worried", "anxious", "scared", "at", "you",
+        "go", "get", "know", "forever", "cat", "hate", "worship", "pray", "ritual", "culture",
+        "nice", "fuel", "fuse", "forget", "remember", "memory" };
+        for(int i = 0; i < words.Length; i++){
+            wordTrie.insert(words[i]);
+        }
     }
 
     public override void _Process(float delta){
@@ -99,8 +111,26 @@ public class UI : Control
                         currentWord = currentLine[i];
                     }
                 }
-                stringSize = playerFont.GetStringSize(playerLine.Text.Substr(0, sentenceLengthTillWordAtCaret + 1));
-                itemList.RectPosition = new Vector2(stringSize.x, itemList.RectPosition.y);
+                //Move Item List to the word that the caret is on.
+                stringSize = playerFont.GetStringSize(playerLine.Text.Substr(0, sentenceLengthTillWordAtCaret));
+                itemList.RectPosition = new Vector2(stringSize.x + 1, itemList.RectPosition.y);
+
+                //Search Trie for the word the user is currently changing text on.
+                List<string> predictedText = wordTrie.search(currentWord);
+                itemList.Clear();
+                if(predictedText == null) {
+                    GD.Print("No searchable word follows from player's text.");
+                    itemList.Hide();
+                } else {
+                    GD.Print("Search: ", currentWord);
+                    for(var i = predictedText.Count - 1; i >= 0; i--){
+                        GD.Print("Searched: ", predictedText[i]);
+                        itemList.Show();
+                        itemList.AddItem(predictedText[i], null, true);
+                    }
+                    itemList.Select(predictedText.Count-1);
+                    itemList.EnsureCurrentIsVisible();
+                }
             }
         }
     }
@@ -137,7 +167,7 @@ public class UI : Control
                         GD.Print("Search: ", currentLine[1]);
                         for(var i = predictedText.Count - 1; i >= 0; i--){
                             GD.Print("Searched: ", predictedText[i]);
-                            itemList.AddItem(predictedText[i], null, true); //This doesn't work. I'm learning about it now.
+                            itemList.AddItem(predictedText[i], null, true);
                         }
                     }
                 }
