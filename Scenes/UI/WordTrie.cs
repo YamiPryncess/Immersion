@@ -55,7 +55,7 @@ public class WordTrie : Node{
             }//perfect spelling. Aside from that only words that the tree knows about can be used.
         }//After getting up to the end of the subword we're going to get ALL words that follow.
         if(node.completeString){
-            predictWords.Add(subword);
+            predictWords.Add(node.word);
         }
         List<TrieNode> queue = new List<TrieNode>();
         return bFRecursion(node, predictWords, queue);
