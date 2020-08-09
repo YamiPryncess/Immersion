@@ -138,10 +138,6 @@ __meta__ = {
 
 [node name="WordTrie" type="Node" parent="UI"]
 script = ExtResource( 1 )
-
-[node name="VScrollBar" type="VScrollBar" parent="UI"]
-margin_right = 12.0
-margin_bottom = 12.0
 [connection signal="text_change_rejected" from="UI/PlayerLine" to="UI" method="_on_PlayerLine_text_change_rejected"]
 [connection signal="text_changed" from="UI/PlayerLine" to="UI" method="_on_PlayerLine_text_changed"]
 [connection signal="text_entered" from="UI/PlayerLine" to="UI" method="_on_PlayerLine_text_entered"]

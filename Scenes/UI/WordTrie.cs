@@ -1,5 +1,9 @@
 using Godot;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Threading;
 
 public class WordTrie : Node{
     TrieNode rootNode;
@@ -141,7 +145,20 @@ public class TrieNode {
         val = letter;
         depth = _depth;
         word = _word;
-        children = new Dictionary<char, TrieNode>();
+        children = new Dictionary<char, TrieNode>(new CharComparer());
         completeString = false;
     }
+}
+
+public class CharComparer : IEqualityComparer<char>
+{
+     public bool Equals(char c1, char c2)
+     {
+          return char.ToLowerInvariant(c1) == char.ToLowerInvariant(c2);
+     }
+     public int GetHashCode(char c1)
+     {
+          return char.ToLowerInvariant(c1).GetHashCode();
+     }
+
 }

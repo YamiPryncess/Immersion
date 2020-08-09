@@ -109,6 +109,7 @@ public class UI : Control
                         sentenceLengthTillWordAtCaret += currentLine[i].Length + 1;
                     } else {
                         currentWord = currentLine[i];
+                        break;
                     }
                 }
                 //Move Item List to the word that the caret is on.
