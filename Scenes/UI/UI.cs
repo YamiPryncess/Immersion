@@ -12,12 +12,15 @@ public class UI : Control
     ItemList itemList;
     WordTrie wordTrie;
     string[] currentLine;
+    List<string> predictedText;
     Master master;
     bool debug = false;
     public override void _Ready(){
         master = GetTree().Root.GetNode<Master>("Master");
         playerLine = (LineEdit)GetNode("PlayerLine");
         itemList = (ItemList)GetNode("PlayerLine/ItemList");
+        //itemList.Hide();
+        itemList.Visible = false;
         wordTrie = GetNode<WordTrie>("WordTrie");
         string[] words = new string[]{"i", "a", "may", "pizza", "food", "love", "lose",
         "let", "lets", "loves", "lover", "give", "me", "have", "no", "yes", "want", 
@@ -38,6 +41,39 @@ public class UI : Control
         // if(Master.player != null && Master.player.playState == Character.PLAYSTATE.TEXT) {
         //     debug();
         // }
+    }
+
+    public override void _Input(InputEvent @event){
+        GD.Print("echoooooooooooooooooooooooooooooooooooooooo");
+        if (@event is InputEventKey key){
+            if(itemList.Visible) {
+                int selected = predictedText.Count - 1;
+                for(var i = 0; i < predictedText.Count; i++){
+                    if(itemList.IsSelected(i)){
+                        selected = i;
+                    }
+                }
+                if(key.IsActionPressed("ui_up")) {
+                    if(selected - 1 < 0){
+                        itemList.Select(predictedText.Count - 1);
+                    } else {
+                        itemList.Select(selected - 1);
+                        GD.Print("uuuuuuuuuuuuuuuuuuuuup");
+                    }
+                    GetTree().SetInputAsHandled();
+                    
+                } else if(key.IsActionPressed("ui_down")) {
+                    if(selected + 1 >= predictedText.Count){
+                        itemList.Select(0);
+                    } else {
+                        itemList.Select(selected + 1);
+                        GD.Print("dooooooooooooooooooown");
+                    }
+                    GetTree().SetInputAsHandled();
+                } 
+                itemList.EnsureCurrentIsVisible();
+            }
+        }
     }
 
   
@@ -68,6 +104,7 @@ public class UI : Control
         int spacesTillCaret = 0;
         int sentenceLengthTillWordAtCaret = 0;
         string currentWord = "";
+        Vector2 textSize = Vector2.Zero;
 
         if(text.Length > 0){
             currentLine = text.Split(" ");
@@ -103,6 +140,7 @@ public class UI : Control
                 playerLine.Text = newText;
                 playerLine.CaretPosition = caret - spacesTillCaret;
                 caret = playerLine.CaretPosition;
+                textSize = playerFont.GetStringSize(playerLine.Text); //Yikes we might have to word count how many letters to delete by calling the size over and over again. Deleting from the end wouldn't be cool though. I need a new algorithm that doesn't limit spaces and instead checks for the spot where the user last typed at and instead deletes that character. Idk if there is some sort of glitch they can do to make it multiple characters past size though lol 
                 //Find the caret position and check what word it's on.
                 for(var i = 0; i < currentLine.Length; i++){
                     if(sentenceLengthTillWordAtCaret + currentLine[i].Length + 1 < caret){
@@ -117,20 +155,23 @@ public class UI : Control
                 itemList.RectPosition = new Vector2(stringSize.x + 1, itemList.RectPosition.y);
 
                 //Search Trie for the word the user is currently changing text on.
-                List<string> predictedText = wordTrie.search(currentWord);
+                predictedText = wordTrie.search(currentWord);
                 itemList.Clear();
                 if(predictedText == null) {
                     GD.Print("No searchable word follows from player's text.");
-                    itemList.Hide();
+                    //itemList.Hide();
+                    itemList.Visible = false;
                 } else {
-                    GD.Print("Search: ", currentWord);
+                    //GD.Print("Search: ", currentWord);
                     for(var i = predictedText.Count - 1; i >= 0; i--){
-                        GD.Print("Searched: ", predictedText[i]);
-                        itemList.Show();
+                        //GD.Print("Searched: ", predictedText[i]);
+                        //itemList.Show();
+                        itemList.Visible = true;
                         itemList.AddItem(predictedText[i], null, true);
                     }
                     itemList.Select(predictedText.Count-1);
                     itemList.EnsureCurrentIsVisible();
+                    //itemList.GrabFocus();
                 }
             }
         }
