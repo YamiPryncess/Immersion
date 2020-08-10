@@ -155,12 +155,13 @@ public class UI : Control
                 } else if(key.IsActionPressed("ui_right")) {
                     if(playerLine.CaretPosition+1 > 
                         beforeWord + selectedWord.Length){
-                            itemList.Clear();
-                            itemList.Visible = false;
-                            selectedWord = "";
                             if(selectedIncomplete){
                                 searchTrie(selectedWord);
                                 GetTree().SetInputAsHandled();
+                            } else {                    
+                                itemList.Clear();
+                                itemList.Visible = false;
+                                selectedWord = "";
                             }
                     }
                 } else if(key.IsActionPressed("ui_select")) {
