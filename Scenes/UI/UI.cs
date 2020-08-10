@@ -10,7 +10,7 @@ public class UI : Control
     ItemList itemList; //To display predictive text
     WordTrie wordTrie; //To predict text (Can also store new words)
     //Unchanging Structures (Internal Functionality)
-    enum LISTSTATE{ TRIE, HELPER, EMPTY }
+    enum LISTSTATE{ TRIE, HELPER, EMPTY, DEEPHELPER }
     LISTSTATE listState = LISTSTATE.EMPTY;
     List<string> textHelper;
 
@@ -188,13 +188,13 @@ public class UI : Control
                     listState = LISTSTATE.EMPTY;
                 }
             } else if(itemList.Visible && listState == LISTSTATE.HELPER){
-                if(key.IsActionPressed("ui_up")) {
-                    int selected = textHelper.Count - 1;
-                    for(var i = 0; i < textHelper.Count; i++){
-                        if(itemList.IsSelected(i)){
-                            selected = i;
-                        }
+                int selected = textHelper.Count - 1;
+                for(var i = 0; i < textHelper.Count; i++){
+                    if(itemList.IsSelected(i)){
+                        selected = i;
                     }
+                }
+                if(key.IsActionPressed("ui_up")) {
                     if(selected - 1 < 0){
                         itemList.Select(textHelper.Count - 1);
                         selected = textHelper.Count - 1;
@@ -205,12 +205,6 @@ public class UI : Control
                     selectedWord = textHelper[selected];
                     GetTree().SetInputAsHandled();
                 } else if(key.IsActionPressed("ui_down")) {
-                    int selected = 0;
-                    for(var i = 0; i < textHelper.Count; i++){
-                        if(itemList.IsSelected(i)){
-                            selected = i;
-                        }
-                    }
                     if(selected + 1 >= textHelper.Count){
                         itemList.Select(0);
                         selected = 0;
@@ -228,7 +222,8 @@ public class UI : Control
                     itemList.Visible = false;
                     listState = LISTSTATE.EMPTY;
                 } else if(key.IsActionPressed("ui_right")) {
-                    
+                    getHelper(selected);
+                    GetTree().SetInputAsHandled();
                 } else if(key.IsActionPressed("ui_select")) {
                     itemList.Clear();
                     itemList.Visible = false;
@@ -435,15 +430,30 @@ public class UI : Control
             itemList.EnsureCurrentIsVisible();
         }
     }
-    public void getHelper(){
+    public void getHelper(int selection = -1){
         itemList.Clear();
-        for(var i = 0; i < textHelper.Count; i++){
-            //itemList.Show();
-            itemList.Visible = true;
-            itemList.AddItem(textHelper[i], null, true);
+        if(selection == -1) {
+            for(var i = 0; i < textHelper.Count; i++){
+                //itemList.Show();
+                itemList.Visible = true;
+                itemList.AddItem(textHelper[i], null, true);
+            }
+            listState = LISTSTATE.HELPER;
+            itemList.Select(textHelper.Count - 1);
+        } else if(selection >= 0){
+            int storeI = 0;
+            for(var i = textHelper.Count - 1; i >= 0; i--){
+                if(i == selection){
+                    for(var j = textHelper[i].Length - 1; j >= 0; j--){
+                        itemList.Visible = true;
+                        itemList.AddItem(textHelper[i][j].ToString());
+                        storeI = i;
+                    }
+                }
+            }
+            listState = LISTSTATE.DEEPHELPER;
+            itemList.Select(textHelper[storeI].Length - 1);
         }
-        listState = LISTSTATE.HELPER;
-        itemList.Select(textHelper.Count - 1);
         itemList.EnsureCurrentIsVisible();
     }
 
