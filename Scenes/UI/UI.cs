@@ -169,6 +169,13 @@ public class UI : Control
                     itemList.Visible = false;
                     selectedWord = "";
                 }
+            } else if(!itemList.Visible) {
+                if(key.IsActionPressed("ui_up")) {
+                    if(playerLine.Text[playerLine.CaretPosition-1] != ' ') {
+                        newSearch(playerLine.Text, playerLine.CaretPosition);
+                        GetTree().SetInputAsHandled();
+                    }
+                }
             }
         }
     }
@@ -275,12 +282,11 @@ public class UI : Control
         playerLine.CaretPosition = caret - removedSpaces;
         globalCaret = playerLine.CaretPosition; //Record current caret for the whole class
     }
-    //findCurWord is Not fully FP yet since it mutates originWord and sentenceLengthEtc
+
     public string[] findCurWord(List<string> lineWords, int caret, bool mutate = false) {
-        string currentWord = "";
+        string currentWord = ""; //This method is dependent on proper spacing at the moment. Idk if I'll keep it like that.
         List<int> wordCount = new List<int>();
         int tillWordAtCaret = 0;
-                                        //From outside but for now it's ok.
         if(lineWords.Count > 0){//Depends on lineWords not being empty
             //Find the caret position and check what word it's on.
             for(var i = 0; i < lineWords.Count; i++){
