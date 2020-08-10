@@ -9,6 +9,10 @@ public class UI : Control
     Font playerFont; //To measure font, requires currently used font
     ItemList itemList; //To display predictive text
     WordTrie wordTrie; //To predict text (Can also store new words)
+    //Unchanging Structures (Internal Functionality)
+    enum LISTSTATE{ TRIE, HELPER, EMPTY }
+    LISTSTATE listState = LISTSTATE.EMPTY;
+    List<string> textHelper;
 
     //In Godot there are multiple processes that code is transfered between.
     //I took a Functional Programming Approach for this script.
@@ -82,6 +86,17 @@ public class UI : Control
         for(int i = 0; i < words.Length; i++){
             wordTrie.insert(words[i]);
         }
+
+        textHelper = new List<string>(){
+            "56789",
+            "01234",
+            "Z.!?:",
+            "UVWXY",
+            "PQRST",
+            "KLMNO",
+            "FGHIJ",
+            "ABCDE"
+        };
     }
 
     public override void _Process(float delta){
@@ -90,7 +105,7 @@ public class UI : Control
     //Entry Handler
     public override void _Input(InputEvent @event){
         if (@event is InputEventKey key){
-            if(itemList.Visible) {
+            if(itemList.Visible && listState == LISTSTATE.TRIE) {
                 List<string> lineWords = currentLine;
                 string prevSelection = selectedWord;
 
@@ -151,6 +166,7 @@ public class UI : Control
                         itemList.Clear();
                         itemList.Visible = false;
                         selectedWord = "";
+                        listState = LISTSTATE.EMPTY;
                     }
                 } else if(key.IsActionPressed("ui_right")) {
                     if(playerLine.CaretPosition+1 > 
@@ -162,19 +178,72 @@ public class UI : Control
                                 itemList.Clear();
                                 itemList.Visible = false;
                                 selectedWord = "";
+                                listState = LISTSTATE.EMPTY;
                             }
                     }
                 } else if(key.IsActionPressed("ui_select")) {
                     itemList.Clear();
                     itemList.Visible = false;
                     selectedWord = "";
+                    listState = LISTSTATE.EMPTY;
+                }
+            } else if(itemList.Visible && listState == LISTSTATE.HELPER){
+                if(key.IsActionPressed("ui_up")) {
+                    int selected = textHelper.Count - 1;
+                    for(var i = 0; i < textHelper.Count; i++){
+                        if(itemList.IsSelected(i)){
+                            selected = i;
+                        }
+                    }
+                    if(selected - 1 < 0){
+                        itemList.Select(textHelper.Count - 1);
+                        selected = textHelper.Count - 1;
+                    } else {
+                        itemList.Select(selected - 1);
+                        selected += -1;
+                    }
+                    selectedWord = textHelper[selected];
+                    GetTree().SetInputAsHandled();
+                } else if(key.IsActionPressed("ui_down")) {
+                    int selected = 0;
+                    for(var i = 0; i < textHelper.Count; i++){
+                        if(itemList.IsSelected(i)){
+                            selected = i;
+                        }
+                    }
+                    if(selected + 1 >= textHelper.Count){
+                        itemList.Select(0);
+                        selected = 0;
+                    } else {
+                        itemList.Select(selected + 1);
+                        selected += 1;
+                    }
+                    selectedWord = textHelper[selected];
+                    GetTree().SetInputAsHandled();
+                }
+                itemList.EnsureCurrentIsVisible();
+
+                if(key.IsActionPressed("ui_left")) {
+                    itemList.Clear();
+                    itemList.Visible = false;
+                    listState = LISTSTATE.EMPTY;
+                } else if(key.IsActionPressed("ui_right")) {
+                    
+                } else if(key.IsActionPressed("ui_select")) {
+                    itemList.Clear();
+                    itemList.Visible = false;
+                    listState = LISTSTATE.EMPTY;
                 }
             } else if(!itemList.Visible) {
                 if(key.IsActionPressed("ui_up")) {
-                    if(playerLine.Text[playerLine.CaretPosition-1] != ' ') {
-                        newSearch(playerLine.Text, playerLine.CaretPosition);
-                        GetTree().SetInputAsHandled();
+                    if(playerLine.Text.Length > 0 &&
+                        playerLine.Text[playerLine.CaretPosition-1] != ' ') {
+                            newSearch(playerLine.Text, playerLine.CaretPosition);
+                            GetTree().SetInputAsHandled();
                     }
+                } else if(key.IsActionPressed("ui_down")){
+                    newHelper(playerLine.Text, playerLine.CaretPosition);
+                    GetTree().SetInputAsHandled();
                 }
             }
         }
@@ -216,12 +285,19 @@ public class UI : Control
     }
     //Changed Text Signal
     public void newSearch(string text, int caret){
-        GD.Print(caret);
         currentLine = text.Split(" ").ToList();
         setText(singleSpace(currentLine), caret,
                 spaceCounter(currentLine, caret));
         string[] results = findCurWord(currentLine, caret, true);
         searchTrie(results[0]);
+        setItemListPos(results[1].ToInt());
+    }
+    public void newHelper(string text, int caret){//I meed to read through this
+        currentLine = text.Split(" ").ToList();//Thoroughly eventually.
+        setText(singleSpace(currentLine), caret,//To make sure the logic is
+                spaceCounter(currentLine, caret));//Flawless and works just the
+        string[] results = findCurWord(currentLine, caret, true);//same as Trie
+        getHelper();
         setItemListPos(results[1].ToInt());
     }
     public string cleanWord(string word){ //Also marks whether word is complete
@@ -261,17 +337,25 @@ public class UI : Control
         return spacesTillCaret;
     }
     public string singleSpace(List<string> lineWords) {
-        string text = "";
-        string lineText = playerLine.Text;
-        for(var i = 0; i < lineWords.Count; i++){
-            if(i == 0){
-                text += lineWords[i];//My  Lov
-            } else {
-                text += " " + lineWords[i];
+        string text = "";//if I remove singleSpace then I'll have to make more
+        string lineText = playerLine.Text;//Code to handle backspace behavior
+        if(lineWords.Count > 0 && lineText.Length > 0) {//backspace at the
+            for(var i = 0; i < lineWords.Count; i++){//beginning of a word
+                if(i == 0 && lineWords[i].Length > 0){//won't reset the listPos
+                    text += lineWords[i];
+                } else if(lineWords[i].Length > 0){
+                    text += " " + lineWords[i];
+                } else {
+                    //handle the error? abort everything???
+                    //for now let's just leave it like this
+                    //I think it'll count for the previous word
+                    //If there is no previous word idk what
+                    //would happen though
+                }
             }
-        }
-        if(lineText[lineText.Length - 1] == ' '){
-            text += " ";
+            if(lineText[lineText.Length - 1] == ' '){
+                text += " ";
+            }
         }
         return text;
     }
@@ -327,7 +411,7 @@ public class UI : Control
         //Search Trie for the word the user is currently changing text on.
         predictedText = wordTrie.search(searchWord);
         itemList.Clear();
-        if(predictedText == null) {
+        if(predictedText == null) {//Need to present error handling eventually.
             GD.Print("No searchable word follows from player's text.");
             //itemList.Hide();
             itemList.Visible = false;
@@ -345,11 +429,24 @@ public class UI : Control
                 itemList.AddItem(searchWord + "~");
                 reversedText.Add(searchWord + "~");
             }
+            listState = LISTSTATE.TRIE;
             predictedText = reversedText; //Same order for predicted and Item List
             itemList.Select(predictedText.Count - 1);
             itemList.EnsureCurrentIsVisible();
         }
     }
+    public void getHelper(){
+        itemList.Clear();
+        for(var i = 0; i < textHelper.Count; i++){
+            //itemList.Show();
+            itemList.Visible = true;
+            itemList.AddItem(textHelper[i], null, true);
+        }
+        listState = LISTSTATE.HELPER;
+        itemList.Select(textHelper.Count - 1);
+        itemList.EnsureCurrentIsVisible();
+    }
+
     //Entered Text Signal
     public void debugTrie(string text) {
         if(text.Length > 0){
