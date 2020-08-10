@@ -92,6 +92,7 @@ public class UI : Control
         if (@event is InputEventKey key){
             if(itemList.Visible) {
                 List<string> lineWords = currentLine;
+                string prevSelection = selectedWord;
 
                 if(key.IsActionPressed("ui_up")) {
                     int selected = predictedText.Count - 1;
@@ -109,7 +110,11 @@ public class UI : Control
                     }
                     selectedWord = predictedText[selected];
                     selectedWord = cleanWord(selectedWord);
-                    lineWords[oriWordInx] = selectedWord;
+                    if(selectedWord != ""){//Root node is the empty one
+                        lineWords[oriWordInx] = selectedWord;
+                    } else {//If it bugs and root node is selectable.
+                        selectedWord = cleanWord(prevSelection);
+                    }//singleSpace() will crash upon reading it.
                     string nextText = singleSpace(lineWords);
                     setText(nextText, beforeWord + selectedWord.Length);
                     GetTree().SetInputAsHandled();
@@ -130,7 +135,11 @@ public class UI : Control
                     }
                     selectedWord = predictedText[selected];
                     selectedWord = cleanWord(selectedWord);
-                    lineWords[oriWordInx] = selectedWord;
+                    if(selectedWord != ""){//Root node is the empty one
+                        lineWords[oriWordInx] = selectedWord;
+                    } else {//If it bugs and root node is selectable.
+                        selectedWord = cleanWord(prevSelection);
+                    }//singleSpace() will crash upon reading it.
                     string nextText = singleSpace(lineWords);
                     setText(nextText, beforeWord + selectedWord.Length);
                     GetTree().SetInputAsHandled();
@@ -150,8 +159,7 @@ public class UI : Control
                             itemList.Visible = false;
                             selectedWord = "";
                             if(selectedIncomplete){
-                                newSearch(playerLine.Text, 
-                                    beforeWord + selectedWord.Length);
+                                searchTrie(selectedWord);
                                 GetTree().SetInputAsHandled();
                             }
                     }
