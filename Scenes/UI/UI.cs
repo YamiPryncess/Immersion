@@ -83,7 +83,6 @@ public class UI : Control
             if(itemList.Visible) {
                 if(key.IsActionPressed("ui_up")) {
                     int selected = predictedText.Count - 1;
-                    List<string> lineWords = currentLine;
                     for(var i = 0; i < predictedText.Count; i++){
                         if(itemList.IsSelected(i)){
                             selected = i;
@@ -94,18 +93,17 @@ public class UI : Control
                         selected = predictedText.Count - 1;
                     } else {
                         itemList.Select(selected - 1);
-                        selected = - 1;
+                        selected += -1;
                     }
                     selectedWord = predictedText[selected];
-                    //Doesn't work yet
-                    /*lineWords[oriWordInx] = selectedWord;
-                    setText(singleSpace(lineWords), caret,
-                    spaceCounter(lineWords, caret));*/
+                    List<string> lineWords = currentLine;
+                    lineWords[oriWordInx] = selectedWord;
+                    string nextText = singleSpace(lineWords);
+                    setText(nextText, nextText.Length);
                     GetTree().SetInputAsHandled();
 
                 } else if(key.IsActionPressed("ui_down")) {
-                    int selected = predictedText.Count - 1;
-                    List<string> lineWords = currentLine;
+                    int selected = 0;
                     for(var i = 0; i < predictedText.Count; i++){
                         if(itemList.IsSelected(i)){
                             selected = i;
@@ -119,9 +117,10 @@ public class UI : Control
                         selected += 1;
                     }
                     selectedWord = predictedText[selected];
-                    /*lineWords[oriWordInx] = selectedWord;
-                    setText(singleSpace(lineWords), caret,
-                    spaceCounter(lineWords, caret));*/
+                    List<string> lineWords = currentLine;
+                    lineWords[oriWordInx] = selectedWord;
+                    string nextText = singleSpace(lineWords);
+                    setText(nextText, nextText.Length);
                     GetTree().SetInputAsHandled();
                 } 
                 itemList.EnsureCurrentIsVisible();
@@ -211,7 +210,7 @@ public class UI : Control
         return text;
     }
 
-    public void setText(string nextText, int prevCaret, int removedSpaces){
+    public void setText(string nextText, int prevCaret, int removedSpaces = 0){
         //Reset the text
         playerLine.Text = nextText;
         playerLine.CaretPosition = prevCaret - removedSpaces;
@@ -263,16 +262,19 @@ public class UI : Control
             itemList.Visible = false;
         } else {
             //GD.Print("Search: ", searchWord);
+            List<string> reversedText = new List<string>();
             for(var i = predictedText.Count - 1; i >= 0; i--){
                 //GD.Print("Searched: ", predictedText[i]);
                 //itemList.Show();
                 itemList.Visible = true;
+                reversedText.Add(predictedText[i]);
                 itemList.AddItem(predictedText[i], null, true);
             }
-            if(searchWord != predictedText[predictedText.Count - 1]) {
+            if(searchWord != reversedText[0]) {
                 itemList.AddItem(searchWord + "~");
-                predictedText.Add(searchWord + "~");
+                reversedText.Add(searchWord + "~");
             }
+            predictedText = reversedText; //Same order for predicted and Item List
             itemList.Select(predictedText.Count - 1);
             itemList.EnsureCurrentIsVisible();
         }
