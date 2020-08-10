@@ -22,6 +22,12 @@ public class UI : Control
     //That event happens again. If you reuse the function that sets it
     //In a place other than than where it's set in the event the code will also
     //break. Regardless if it's in the same process or another process.
+    
+    //Caution 3
+    //Upon making the selectedIncomplete Variable I realized that
+    //If I don't use the function that sets the variable every time the
+    //necessary event happens. Then I won't have the variable set as it
+    //needs to be.
 
     //To prevent that I made a mutation rules for functions that:
 
@@ -41,12 +47,16 @@ public class UI : Control
     //Central Structures (No M.O. because they change only when they should.
     List<string> predictedText; //By cycle I mean the next time the player types
     List<string> currentLine; //We store what the player types in here
-    int caret; //MO Not set.
+    int globalCaret; //I made the newSearch code not depend on this anymore.
     string selectedWord = ""; //Only used when _Input() needs it.
+    bool selectedIncomplete = false; //Exclusively set by cleanWord()
+    //So you can never select a word without using cleanWord() I guess that's
+    //Another mutation difficulty but I'm fine with it since it's needed really.
 
     //Mutating Variables (M.O. because they could change when they shouldn't)
     string originWord = ""; //MO Set, could be set in findCurWord()
     int oriWordInx = 0; //MO Set, could be set in findCurWord()
+    int beforeWord = 0;
 
     //Class Utility
     [Export] bool debug = false;
@@ -81,6 +91,8 @@ public class UI : Control
     public override void _Input(InputEvent @event){
         if (@event is InputEventKey key){
             if(itemList.Visible) {
+                List<string> lineWords = currentLine;
+
                 if(key.IsActionPressed("ui_up")) {
                     int selected = predictedText.Count - 1;
                     for(var i = 0; i < predictedText.Count; i++){
@@ -96,10 +108,10 @@ public class UI : Control
                         selected += -1;
                     }
                     selectedWord = predictedText[selected];
-                    List<string> lineWords = currentLine;
+                    selectedWord = cleanWord(selectedWord);
                     lineWords[oriWordInx] = selectedWord;
                     string nextText = singleSpace(lineWords);
-                    setText(nextText, nextText.Length);
+                    setText(nextText, beforeWord + selectedWord.Length);
                     GetTree().SetInputAsHandled();
 
                 } else if(key.IsActionPressed("ui_down")) {
@@ -117,13 +129,37 @@ public class UI : Control
                         selected += 1;
                     }
                     selectedWord = predictedText[selected];
-                    List<string> lineWords = currentLine;
+                    selectedWord = cleanWord(selectedWord);
                     lineWords[oriWordInx] = selectedWord;
                     string nextText = singleSpace(lineWords);
-                    setText(nextText, nextText.Length);
+                    setText(nextText, beforeWord + selectedWord.Length);
                     GetTree().SetInputAsHandled();
-                } 
+                }
                 itemList.EnsureCurrentIsVisible();
+
+                if(key.IsActionPressed("ui_left")) {
+                    if(playerLine.CaretPosition-1 < beforeWord) {
+                        itemList.Clear();
+                        itemList.Visible = false;
+                        selectedWord = "";
+                    }
+                } else if(key.IsActionPressed("ui_right")) {
+                    if(playerLine.CaretPosition+1 > 
+                        beforeWord + selectedWord.Length){
+                            itemList.Clear();
+                            itemList.Visible = false;
+                            selectedWord = "";
+                            if(selectedIncomplete){
+                                newSearch(playerLine.Text, 
+                                    beforeWord + selectedWord.Length);
+                                GetTree().SetInputAsHandled();
+                            }
+                    }
+                } else if(key.IsActionPressed("ui_select")) {
+                    itemList.Clear();
+                    itemList.Visible = false;
+                    selectedWord = "";
+                }
             }
         }
     }
@@ -144,17 +180,12 @@ public class UI : Control
     }
     //=================Signal Methods=================
     public void _on_PlayerLine_text_changed(string text){
-        caret = playerLine.CaretPosition; //Reset Global Caret
+        int caret = playerLine.CaretPosition;
         if(text.Length > 0){
-            if(caret > 0 && text[caret-1] == ' '){
+            if((caret > 0 && text[caret-1] == ' ') || caret == 0){
                 return;
             }
-            currentLine = text.Split(" ").ToList();
-            setText(singleSpace(currentLine), caret,
-                    spaceCounter(currentLine, caret));
-            string[] results = findCurWord(currentLine, true);
-            searchTrie(results[0]);
-            setItemListPos(results[1].ToInt());
+            newSearch(text, caret);
         }
     }
 
@@ -168,7 +199,26 @@ public class UI : Control
 
     }
     //Changed Text Signal
-    public int spaceCounter(List<string> lineWords, int prevCaret){
+    public void newSearch(string text, int caret){
+        GD.Print(caret);
+        currentLine = text.Split(" ").ToList();
+        setText(singleSpace(currentLine), caret,
+                spaceCounter(currentLine, caret));
+        string[] results = findCurWord(currentLine, caret, true);
+        searchTrie(results[0]);
+        setItemListPos(results[1].ToInt());
+    }
+    public string cleanWord(string word){ //Also marks whether word is complete
+        selectedIncomplete = false;
+        if(word[word.Length - 1] == '-') {
+            selectedIncomplete = true;
+            return word.Substr(0, word.Length - 1);
+        } else if(word[word.Length - 1] == '~'){
+            return word.Substr(0, word.Length - 1);
+        }
+        return word;
+    }
+    public int spaceCounter(List<string> lineWords, int caret){
         int spacesTillCaret = 0;
         string lineText = playerLine.Text;
         bool space = true;
@@ -186,7 +236,7 @@ public class UI : Control
                     startCounting = true;//Skip the first space after each word
                     countInd++;
                 } else if(startCounting == true) { //Only count beginning spaces and 2 spaces after each word.
-                    if(space == true && i < prevCaret) {
+                    if(space == true && i < caret) {
                         spacesTillCaret++;
                     }
                 }
@@ -194,7 +244,7 @@ public class UI : Control
         }
         return spacesTillCaret;
     }
-    public string singleSpace(List<string> lineWords, int prevCaret = -1) {
+    public string singleSpace(List<string> lineWords) {
         string text = "";
         string lineText = playerLine.Text;
         for(var i = 0; i < lineWords.Count; i++){
@@ -210,14 +260,14 @@ public class UI : Control
         return text;
     }
 
-    public void setText(string nextText, int prevCaret, int removedSpaces = 0){
+    public void setText(string nextText, int caret, int removedSpaces = 0){
         //Reset the text
         playerLine.Text = nextText;
-        playerLine.CaretPosition = prevCaret - removedSpaces;
-        caret = playerLine.CaretPosition; //Record current caret for the whole class
+        playerLine.CaretPosition = caret - removedSpaces;
+        globalCaret = playerLine.CaretPosition; //Record current caret for the whole class
     }
     //findCurWord is Not fully FP yet since it mutates originWord and sentenceLengthEtc
-    public string[] findCurWord(List<string> lineWords, bool mutate = false) {
+    public string[] findCurWord(List<string> lineWords, int caret, bool mutate = false) {
         string currentWord = "";
         List<int> wordCount = new List<int>();
         int tillWordAtCaret = 0;
@@ -225,16 +275,22 @@ public class UI : Control
         if(lineWords.Count > 0){//Depends on lineWords not being empty
             //Find the caret position and check what word it's on.
             for(var i = 0; i < lineWords.Count; i++){
+                //Caution, Spaces in front of words count as previous word
+                //and not following word even if the caret was touching the
+                //following word from behind. + 1 counts for 1 separating space.
                 if(tillWordAtCaret + lineWords[i].Length + 1 < caret){
-                    tillWordAtCaret += lineWords[i].Length + 1; //+1 counts for 1 separating space
+                    tillWordAtCaret += lineWords[i].Length + 1;
                 } else {
                     currentWord = lineWords[i];//To return to other functions
                     if(mutate) { //If I called this function for a word that
                     //wasn't the original I'd mess up the originWord variable.
                     //That's why not mututing external stuff in functions is
-                    //so important.
-                        originWord = lineWords[i];//Also store for whole class
+                    //so important. We only store it for the whole class when
+                    //A new Item List is to be created from this info.
+                        originWord = cleanWord(lineWords[i]);
+                        selectedWord = cleanWord(lineWords[i]);
                         oriWordInx = i;//Remember the Index for the class as well
+                        beforeWord = tillWordAtCaret;
                     }
                     break;
                 }
