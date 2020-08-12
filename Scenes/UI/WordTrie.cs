@@ -42,6 +42,21 @@ public class WordTrie : Node{
         }
         return true;
     }
+
+    public TrieNode findWord(string word) {
+        TrieNode node = rootNode;
+
+        for(int i = 0; i < word.Length; i++) {
+            char currentLetter = word[i];
+            if(node.children.ContainsKey(currentLetter)){
+                node = node.children[currentLetter];
+                if(i == word.Length-1 && node.completeString){
+                    return node;
+                }
+            }
+        }
+        return rootNode;
+    }
     public List<string> search(string subword) {
         TrieNode node = rootNode;
         List<string> predictWords = new List<string>();
@@ -54,6 +69,10 @@ public class WordTrie : Node{
                 return null;//Return null. This may be less strict eventually but for now it must be
             }//perfect spelling. Aside from that only words that the tree knows about can be used.
         }//After getting up to the end of the subword we're going to get ALL words that follow.
+        if(node.isRootNode){//This method is not for getting all words.
+            return predictWords; //Which is empty.
+        }
+        
         if(node.completeString){
             predictWords.Add(node.word);
         }
@@ -140,13 +159,20 @@ public class TrieNode {
     public bool completeString;
     public int depth = 0;
     public string word = "";
+    public bool isRootNode = false;
 
     public TrieNode(char letter = ' ', int _depth = 0, string _word = ""){
         val = letter;
         depth = _depth;
         word = _word;
-        children = new Dictionary<char, TrieNode>(new CharComparer());
         completeString = false;
+
+        if(letter == ' ' && _depth == 0 && _word == ""){
+            isRootNode = true;
+            children = new Dictionary<char, TrieNode>(new RootComparer());
+        } else {
+            children = new Dictionary<char, TrieNode>(new CharComparer());
+        }
     }
 }
 
@@ -159,6 +185,19 @@ public class CharComparer : IEqualityComparer<char>
      public int GetHashCode(char c1)
      {
           return char.ToLowerInvariant(c1).GetHashCode();
+     }
+
+}
+
+public class RootComparer : IEqualityComparer<char>
+{
+     public bool Equals(char c1, char c2)
+     {
+          return char.ToUpperInvariant(c1) == char.ToUpperInvariant(c2);
+     }
+     public int GetHashCode(char c1)
+     {
+          return char.ToUpperInvariant(c1).GetHashCode();
      }
 
 }

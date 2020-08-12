@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://Scenes/UI/WordTrie.cs" type="Script" id=1]
 [ext_resource path="res://Scenes/UI/UI.cs" type="Script" id=2]
@@ -6,6 +6,7 @@
 [ext_resource path="res://Scenes/UI/InventoryUI.tscn" type="PackedScene" id=4]
 [ext_resource path="res://Scenes/Level/Flatplane.tscn" type="PackedScene" id=5]
 [ext_resource path="res://Scenes/Game/Master.cs" type="Script" id=6]
+[ext_resource path="res://Scenes/UI/Keyboard.cs" type="Script" id=7]
 
 [sub_resource type="CylinderShape" id=1]
 radius = 0.245709
@@ -123,7 +124,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ItemList" type="ItemList" parent="UI/PlayerLine"]
+[node name="WordList" type="ItemList" parent="UI/PlayerLine"]
 anchor_right = 1.0
 margin_left = 0.200424
 margin_top = -133.268
@@ -135,6 +136,265 @@ allow_rmb_select = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="Keyboard" type="Panel" parent="UI/PlayerLine"]
+visible = false
+margin_left = 118.0
+margin_top = -143.0
+margin_right = 342.0
+margin_bottom = 1.0
+script = ExtResource( 7 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="KeyGrid" type="GridContainer" parent="UI/PlayerLine/Keyboard"]
+margin_right = 224.0
+margin_bottom = 144.0
+columns = 6
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="124" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_right = 36.0
+margin_bottom = 20.0
+text = "123"
+
+[node name="457" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 40.0
+margin_right = 76.0
+margin_bottom = 20.0
+text = "456"
+
+[node name="790" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 80.0
+margin_right = 117.0
+margin_bottom = 20.0
+text = "789"
+
+[node name="Verb" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 121.0
+margin_right = 154.0
+margin_bottom = 20.0
+text = "0+-"
+
+[node name="Equals" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 158.0
+margin_right = 189.0
+margin_bottom = 20.0
+text = "=:;"
+
+[node name="Backspace" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 193.0
+margin_right = 220.0
+margin_bottom = 20.0
+text = "<_"
+
+[node name="Aa" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_top = 24.0
+margin_right = 36.0
+margin_bottom = 44.0
+text = "Aa"
+
+[node name="Bb" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 40.0
+margin_top = 24.0
+margin_right = 76.0
+margin_bottom = 44.0
+text = "Bb"
+
+[node name="Cc" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 80.0
+margin_top = 24.0
+margin_right = 117.0
+margin_bottom = 44.0
+text = "Cc"
+
+[node name="Dd" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 121.0
+margin_top = 24.0
+margin_right = 154.0
+margin_bottom = 44.0
+text = "Dd"
+
+[node name="Ee" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 158.0
+margin_top = 24.0
+margin_right = 189.0
+margin_bottom = 44.0
+text = "Ee"
+
+[node name="Enter" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 193.0
+margin_top = 24.0
+margin_right = 220.0
+margin_bottom = 44.0
+text = "_>"
+
+[node name="Ff" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_top = 48.0
+margin_right = 36.0
+margin_bottom = 68.0
+text = "Ff"
+
+[node name="Gg" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 40.0
+margin_top = 48.0
+margin_right = 76.0
+margin_bottom = 68.0
+text = "Gg"
+
+[node name="Hh" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 80.0
+margin_top = 48.0
+margin_right = 117.0
+margin_bottom = 68.0
+text = "Hh"
+
+[node name="Ii" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 121.0
+margin_top = 48.0
+margin_right = 154.0
+margin_bottom = 68.0
+text = "Ii"
+
+[node name="Jj" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 158.0
+margin_top = 48.0
+margin_right = 189.0
+margin_bottom = 68.0
+text = "Jj"
+
+[node name="Dashes" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 193.0
+margin_top = 48.0
+margin_right = 220.0
+margin_bottom = 68.0
+text = "' \""
+
+[node name="Kk" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_top = 72.0
+margin_right = 36.0
+margin_bottom = 92.0
+text = "Kk"
+
+[node name="Ll" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 40.0
+margin_top = 72.0
+margin_right = 76.0
+margin_bottom = 92.0
+text = "Ll"
+
+[node name="Mm" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 80.0
+margin_top = 72.0
+margin_right = 117.0
+margin_bottom = 92.0
+text = "Mm"
+
+[node name="Nn" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 121.0
+margin_top = 72.0
+margin_right = 154.0
+margin_bottom = 92.0
+text = "Nn"
+
+[node name="Oo" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 158.0
+margin_top = 72.0
+margin_right = 189.0
+margin_bottom = 92.0
+text = "Oo"
+
+[node name="Symbols" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 193.0
+margin_top = 72.0
+margin_right = 220.0
+margin_bottom = 92.0
+text = "!?"
+
+[node name="Pp" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_top = 96.0
+margin_right = 36.0
+margin_bottom = 116.0
+text = "Pp"
+
+[node name="Qq" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 40.0
+margin_top = 96.0
+margin_right = 76.0
+margin_bottom = 116.0
+text = "Qq"
+
+[node name="Rr" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 80.0
+margin_top = 96.0
+margin_right = 117.0
+margin_bottom = 116.0
+text = "Rr"
+
+[node name="Ss" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 121.0
+margin_top = 96.0
+margin_right = 154.0
+margin_bottom = 116.0
+text = "Ss"
+
+[node name="Tt" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 158.0
+margin_top = 96.0
+margin_right = 189.0
+margin_bottom = 116.0
+text = "Tt"
+
+[node name="Commas" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 193.0
+margin_top = 96.0
+margin_right = 220.0
+margin_bottom = 116.0
+text = ".,"
+
+[node name="Uu" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_top = 120.0
+margin_right = 36.0
+margin_bottom = 140.0
+text = "Uu"
+
+[node name="Vv" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 40.0
+margin_top = 120.0
+margin_right = 76.0
+margin_bottom = 140.0
+text = "Vv"
+
+[node name="Ww" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 80.0
+margin_top = 120.0
+margin_right = 117.0
+margin_bottom = 140.0
+text = "Ww"
+
+[node name="Xx" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 121.0
+margin_top = 120.0
+margin_right = 154.0
+margin_bottom = 140.0
+text = "Xx"
+
+[node name="Yy" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 158.0
+margin_top = 120.0
+margin_right = 189.0
+margin_bottom = 140.0
+text = "Yy"
+
+[node name="Zz" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 193.0
+margin_top = 120.0
+margin_right = 220.0
+margin_bottom = 140.0
+text = "Zz"
 
 [node name="WordTrie" type="Node" parent="UI"]
 script = ExtResource( 1 )

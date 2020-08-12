@@ -7,12 +7,15 @@ public class UI : Control
     Master master; //Changes player control state
     LineEdit playerLine; //To change the Line Edit Text
     Font playerFont; //To measure font, requires currently used font
-    ItemList itemList; //To display predictive text
+    ItemList wordList; //To display predictive text
     WordTrie wordTrie; //To predict text (Can also store new words)
     //Unchanging Structures (Internal Functionality)
-    enum LISTSTATE{ TRIE, HELPER, EMPTY, DEEPHELPER }
-    LISTSTATE listState = LISTSTATE.EMPTY;
-    List<string> textHelper;
+    Panel keyboard;
+    public enum HELPER{ LONETRIE, EMPTY, KEYBOARD }
+    HELPER helperState = HELPER.EMPTY;
+    public enum ACTION{ UP, DOWN, LEFT, RIGHT, UNKNOWN }
+    public enum EFFECT{ CHANGETEXT, JUSTSTORE, UNKNOWN}
+    List<string> textHelper;//Not being used anymore
 
     //In Godot there are multiple processes that code is transfered between.
     //I took a Functional Programming Approach for this script.
@@ -52,7 +55,10 @@ public class UI : Control
     List<string> predictedText; //By cycle I mean the next time the player types
     List<string> currentLine; //We store what the player types in here
     int globalCaret; //I made the newSearch code not depend on this anymore.
+    //int deepInx; //I was using this to access contents inside of text helper
+    bool charAdded = false; //Stored to check whether value is already 1 or not
     string selectedWord = ""; //Only used when _Input() needs it.
+    char selectedChar = ' ';//Because calling char's words bothers me lol
     bool selectedIncomplete = false; //Exclusively set by cleanWord()
     //So you can never select a word without using cleanWord() I guess that's
     //Another mutation difficulty but I'm fine with it since it's needed really.
@@ -70,103 +76,74 @@ public class UI : Control
         master = GetTree().Root.GetNode<Master>("Master");
         playerLine = (LineEdit)GetNode("PlayerLine");
         playerFont = playerLine.GetFont(""); //Needs actual current font
-        itemList = (ItemList)GetNode("PlayerLine/ItemList");
-        //itemList.Hide();
-        itemList.Visible = false;
+        wordList = (ItemList)GetNode("PlayerLine/WordList");
+        keyboard = (Panel)GetNode("PlayerLine/Keyboard");
+        //wordList.Hide();
+        wordList.Visible = false;
+        keyboard.Visible = false;
         wordTrie = GetNode<WordTrie>("WordTrie");
-        string[] words = new string[]{"i", "a", "may", "pizza", "food", "love", "lose",
-        "let", "lets", "loves", "lover", "give", "me", "have", "no", "yes", "want", 
-        "need", "desire", "never", "look", "loss", "loser", "loveliest", "else", "tell", "me",
-        "know", "feel", "hunger", "table", "worship", "stay", "with", "my", "loveliest", "lovely",
-        "kill", "killing", "kills", "harsh", "kind", "great", "create", "move", "sister", "brother",
-        "mom", "dad", "heal", "cherish", "nevermind", "master", "lord", "break", "romance", "happy",
-        "sad", "fear", "up", "down", "depressed", "angry", "worried", "anxious", "scared", "at", "you",
-        "go", "get", "know", "forever", "cat", "hate", "worship", "pray", "ritual", "culture",
-        "nice", "fuel", "fuse", "forget", "remember", "memory", "open", "petty", "pity", "observation" };
+        string[] words = new string[]{"I", "A", "May", "Pizza", "Food", "Love", "Lose",
+        "Let", "Lets", "Loves", "Lover", "Give", "Me", "Have", "No", "Yes", "Want", 
+        "Need", "Desire", "Never", "Look", "Loss", "Loser", "Loveliest", "Else", "Tell", "Me",
+        "Know", "Feel", "Hunger", "Table", "Worship", "Stay", "With", "My", "Loveliest", "Lovely",
+        "Kill", "Killing", "Kills", "Harsh", "Kind", "Great", "Create", "Move", "Sister", "Brother",
+        "Mom", "Dad", "Heal", "Cherish", "Nevermind", "Master", "Lord", "Break", "Romance", "Happy",
+        "Sad", "Fear", "Up", "Down", "Depressed", "Angry", "Worried", "Anxious", "Scared", "At", "You",
+        "Go", "Get", "Know", "Forever", "Cat", "Hate", "Worship", "Pray", "Ritual", "Culture",
+        "Nice", "Fuel", "Fuse", "Forget", "Remember", "Memory", "Open", "Petty", "Pity", "Observation" };
         for(int i = 0; i < words.Length; i++){
             wordTrie.insert(words[i]);
         }
 
         textHelper = new List<string>(){
-            "56789",
-            "01234",
-            "Z.!?:",
-            "UVWXY",
-            "PQRST",
-            "KLMNO",
-            "FGHIJ",
-            "ABCDE"
+            "Shortcuts2",
+            "Shortcuts1",
+            "Fear",
+            "Anger",
+            "Concern",
+            "Sadness",
+            "Happiness",
+            "Assertions",
+            "Questions",
+            "Commands",
+            "Judgement",
+            "Feelings"
         };
+
+        /*feelings = new List<string>(){
+            "Shortcuts3",
+            "Shortcuts2",
+            "Shortcuts1",
+            "Assertions",
+            "Questions",
+            "Commands",
+            "Judgement",
+            "I'm glad. :)"
+        };*/
+
     }
 
     public override void _Process(float delta){
         input();
     }
-    //Entry Handler
+    //Entry Input Handler
     public override void _Input(InputEvent @event){
         if (@event is InputEventKey key){
-            if(itemList.Visible && listState == LISTSTATE.TRIE) {
-                List<string> lineWords = currentLine;
-                string prevSelection = selectedWord;
+            if(wordList.Visible && helperState == HELPER.LONETRIE) {
 
                 if(key.IsActionPressed("ui_up")) {
-                    int selected = predictedText.Count - 1;
-                    for(var i = 0; i < predictedText.Count; i++){
-                        if(itemList.IsSelected(i)){
-                            selected = i;
-                        }
-                    }
-                    if(selected - 1 < 0){
-                        itemList.Select(predictedText.Count - 1);
-                        selected = predictedText.Count - 1;
-                    } else {
-                        itemList.Select(selected - 1);
-                        selected += -1;
-                    }
-                    selectedWord = predictedText[selected];
-                    selectedWord = cleanWord(selectedWord);
-                    if(selectedWord != ""){//Root node is the empty one
-                        lineWords[oriWordInx] = selectedWord;
-                    } else {//If it bugs and root node is selectable.
-                        selectedWord = cleanWord(prevSelection);
-                    }//singleSpace() will crash upon reading it.
-                    string nextText = singleSpace(lineWords);
-                    setText(nextText, beforeWord + selectedWord.Length);
-                    GetTree().SetInputAsHandled();
-
+                    selection(predictedText, findSelected(predictedText),
+                                ACTION.UP, EFFECT.CHANGETEXT);
                 } else if(key.IsActionPressed("ui_down")) {
-                    int selected = 0;
-                    for(var i = 0; i < predictedText.Count; i++){
-                        if(itemList.IsSelected(i)){
-                            selected = i;
-                        }
-                    }
-                    if(selected + 1 >= predictedText.Count){
-                        itemList.Select(0);
-                        selected = 0;
-                    } else {
-                        itemList.Select(selected + 1);
-                        selected += 1;
-                    }
-                    selectedWord = predictedText[selected];
-                    selectedWord = cleanWord(selectedWord);
-                    if(selectedWord != ""){//Root node is the empty one
-                        lineWords[oriWordInx] = selectedWord;
-                    } else {//If it bugs and root node is selectable.
-                        selectedWord = cleanWord(prevSelection);
-                    }//singleSpace() will crash upon reading it.
-                    string nextText = singleSpace(lineWords);
-                    setText(nextText, beforeWord + selectedWord.Length);
-                    GetTree().SetInputAsHandled();
+                    selection(predictedText, findSelected(predictedText),
+                                ACTION.DOWN, EFFECT.CHANGETEXT);
                 }
-                itemList.EnsureCurrentIsVisible();
-
                 if(key.IsActionPressed("ui_left")) {
                     if(playerLine.CaretPosition-1 < beforeWord) {
-                        itemList.Clear();
-                        itemList.Visible = false;
+                        wordList.Clear();
+                        wordList.Visible = false;
                         selectedWord = "";
-                        listState = LISTSTATE.EMPTY;
+                        helperState = HELPER.EMPTY;
                     }
                 } else if(key.IsActionPressed("ui_right")) {
                     if(playerLine.CaretPosition+1 > 
@@ -175,69 +152,28 @@ public class UI : Control
                                 searchTrie(selectedWord);
                                 GetTree().SetInputAsHandled();
                             } else {                    
-                                itemList.Clear();
-                                itemList.Visible = false;
+                                wordList.Clear();
+                                wordList.Visible = false;
                                 selectedWord = "";
-                                listState = LISTSTATE.EMPTY;
+                                helperState = HELPER.EMPTY;
                             }
                     }
                 } else if(key.IsActionPressed("ui_select")) {
-                    itemList.Clear();
-                    itemList.Visible = false;
+                    wordList.Clear();
+                    wordList.Visible = false;
                     selectedWord = "";
-                    listState = LISTSTATE.EMPTY;
+                    helperState = HELPER.EMPTY;
                 }
-            } else if(itemList.Visible && listState == LISTSTATE.HELPER){
-                int selected = textHelper.Count - 1;
-                for(var i = 0; i < textHelper.Count; i++){
-                    if(itemList.IsSelected(i)){
-                        selected = i;
-                    }
-                }
+            } else if(!wordList.Visible) {
                 if(key.IsActionPressed("ui_up")) {
-                    if(selected - 1 < 0){
-                        itemList.Select(textHelper.Count - 1);
-                        selected = textHelper.Count - 1;
-                    } else {
-                        itemList.Select(selected - 1);
-                        selected += -1;
-                    }
-                    selectedWord = textHelper[selected];
-                    GetTree().SetInputAsHandled();
-                } else if(key.IsActionPressed("ui_down")) {
-                    if(selected + 1 >= textHelper.Count){
-                        itemList.Select(0);
-                        selected = 0;
-                    } else {
-                        itemList.Select(selected + 1);
-                        selected += 1;
-                    }
-                    selectedWord = textHelper[selected];
-                    GetTree().SetInputAsHandled();
-                }
-                itemList.EnsureCurrentIsVisible();
-
-                if(key.IsActionPressed("ui_left")) {
-                    itemList.Clear();
-                    itemList.Visible = false;
-                    listState = LISTSTATE.EMPTY;
-                } else if(key.IsActionPressed("ui_right")) {
-                    getHelper(selected);
-                    GetTree().SetInputAsHandled();
-                } else if(key.IsActionPressed("ui_select")) {
-                    itemList.Clear();
-                    itemList.Visible = false;
-                    listState = LISTSTATE.EMPTY;
-                }
-            } else if(!itemList.Visible) {
-                if(key.IsActionPressed("ui_up")) {
-                    if(playerLine.Text.Length > 0 &&
-                        playerLine.Text[playerLine.CaretPosition-1] != ' ') {
-                            newSearch(playerLine.Text, playerLine.CaretPosition);
-                            GetTree().SetInputAsHandled();
+                    if(playerLine.Text.Length > 0 && 
+                        playerLine.CaretPosition != 0 &&
+                            playerLine.Text[playerLine.CaretPosition-1] != ' ') {
+                        newSearch(playerLine.Text, playerLine.CaretPosition);
+                        GetTree().SetInputAsHandled();
                     }
                 } else if(key.IsActionPressed("ui_down")){
-                    newHelper(playerLine.Text, playerLine.CaretPosition);
+                    newKeyboard(playerLine.Text, playerLine.CaretPosition);
                     GetTree().SetInputAsHandled();
                 }
             }
@@ -258,6 +194,59 @@ public class UI : Control
             }
         }
     }
+    //Entry Input Handler Methods
+    public int findSelected(List<string> list){
+        int selected = list.Count - 1; 
+        //Store current selection
+        for(var i = 0; i < list.Count; i++){
+            if(wordList.IsSelected(i)){
+                selected = i;
+            }
+        }
+        return selected;
+    }
+    public void selection(List<string> list, int selected, ACTION action = ACTION.UNKNOWN, EFFECT effect = EFFECT.UNKNOWN) {
+        List<string> lineWords = currentLine;
+        string prevSelection = selectedWord;
+        if(action == ACTION.UP || action == ACTION.DOWN){
+            //Spin Selection by 1
+            if(action == ACTION.UP){
+                if(selected - 1 < 0){
+                    wordList.Select(list.Count - 1);
+                    selected = list.Count - 1;
+                } else {
+                    wordList.Select(selected - 1);
+                    selected += -1;
+                }
+                GetTree().SetInputAsHandled();
+            } else if(action == ACTION.DOWN){
+                if(selected + 1 >= list.Count){
+                    wordList.Select(0);
+                    selected = 0;
+                } else {
+                    wordList.Select(selected + 1);
+                    selected += 1;
+                }
+                GetTree().SetInputAsHandled();
+            }
+            if(effect == EFFECT.JUSTSTORE) {
+                selectedWord = list[selected];
+            } else if(effect == EFFECT.CHANGETEXT){
+                selectedWord = list[selected];
+                //cleanWord is currently needed for selectionIncomplete bool
+                selectedWord = cleanWord(selectedWord);
+                if(selectedWord != ""){//Root node is the empty one
+                    lineWords[oriWordInx] = selectedWord;
+                } else {//If it bugs and root node becomes selectable.
+                    selectedWord = cleanWord(prevSelection);
+                }//singleSpace() will crash upon reading it.
+                string nextText = singleSpace(lineWords);
+                setText(nextText, beforeWord + selectedWord.Length);
+            }
+            wordList.EnsureCurrentIsVisible();
+        }
+    }
+
     //=================Signal Methods=================
     public void _on_PlayerLine_text_changed(string text){
         int caret = playerLine.CaretPosition;
@@ -285,16 +274,32 @@ public class UI : Control
                 spaceCounter(currentLine, caret));
         string[] results = findCurWord(currentLine, caret, true);
         searchTrie(results[0]);
-        setItemListPos(results[1].ToInt());
+        setHelperPos(results[1].ToInt(), HELPER.LONETRIE);
     }
-    public void newHelper(string text, int caret){//I meed to read through this
-        currentLine = text.Split(" ").ToList();//Thoroughly eventually.
-        setText(singleSpace(currentLine), caret,//To make sure the logic is
-                spaceCounter(currentLine, caret));//Flawless and works just the
-        string[] results = findCurWord(currentLine, caret, true);//same as Trie
-        getHelper();
-        setItemListPos(results[1].ToInt());
+    public void newKeyboard(string text, int caret){
+        currentLine = text.Split(" ").ToList();
+        int exactCaret = 0;
+        string[] results = new string[]{"","0"};
+        if(text.Length > 0){
+            exactCaret = setText(singleSpace(currentLine), caret,
+                    spaceCounter(currentLine, caret));
+            results = findCurWord(currentLine, caret, true);
+        }
+        keyboard.Visible = true;
+        string pText = playerLine.Text;
+        if((exactCaret > 0 && pText[exactCaret-1] == ' ')){//> 0 is a error handler            
+            searchTrie(results[0], HELPER.KEYBOARD, true);
+            setHelperPos(exactCaret, HELPER.KEYBOARD);
+        } else if(exactCaret > 0 && pText[exactCaret-1] != ' '){
+            searchTrie(results[0], HELPER.KEYBOARD, false);            
+            setHelperPos(results[1].ToInt(), HELPER.KEYBOARD);
+        } else if(exactCaret == 0) {
+            searchTrie(results[0], HELPER.KEYBOARD, true);
+            setHelperPos(results[1].ToInt(), HELPER.KEYBOARD);
+        }
+        helperState = HELPER.KEYBOARD;
     }
+
     public string cleanWord(string word){ //Also marks whether word is complete
         selectedIncomplete = false;
         if(word[word.Length - 1] == '-') {
@@ -355,11 +360,12 @@ public class UI : Control
         return text;
     }
 
-    public void setText(string nextText, int caret, int removedSpaces = 0){
+    public int setText(string nextText, int caret, int removedSpaces = 0){
         //Reset the text
         playerLine.Text = nextText;
         playerLine.CaretPosition = caret - removedSpaces;
         globalCaret = playerLine.CaretPosition; //Record current caret for the whole class
+        return playerLine.CaretPosition;
     }
 
     public string[] findCurWord(List<string> lineWords, int caret, bool mutate = false) {
@@ -372,6 +378,7 @@ public class UI : Control
                 //Caution, Spaces in front of words count as previous word
                 //and not following word even if the caret was touching the
                 //following word from behind. + 1 counts for 1 separating space.
+                //I might change this later to count the space behind instead of in front.
                 if(tillWordAtCaret + lineWords[i].Length + 1 < caret){
                     tillWordAtCaret += lineWords[i].Length + 1;
                 } else {
@@ -393,68 +400,60 @@ public class UI : Control
         return new string[]{currentWord, tillWordAtCaret.ToString()};
     }
 
-    public void setItemListPos(int tillWordAtCaret) {
-        Vector2 textToCaretSize = new Vector2();
+    public void setHelperPos(int tillWordAtCaret, HELPER helperState) {
+        Vector2 textToCaretSize = Vector2.Zero;
         //Move Item List to the word that the caret is on.
-        textToCaretSize = playerFont.GetStringSize(playerLine.Text.Substr(0,
+        if(playerLine.Text.Length > 0){
+            textToCaretSize = playerFont.GetStringSize(playerLine.Text.Substr(0,
                                                 tillWordAtCaret));
-        itemList.RectPosition = new Vector2(textToCaretSize.x + 1,
-                                            itemList.RectPosition.y);
+        }
+        if(helperState == HELPER.LONETRIE){
+            wordList.RectPosition = new Vector2(textToCaretSize.x + 1,
+                                                wordList.RectPosition.y);
+        } else if(helperState == HELPER.KEYBOARD){
+            keyboard.RectPosition = new Vector2(textToCaretSize.x + 1,
+                                    keyboard.RectPosition.y);
+            wordList.RectPosition = new Vector2(textToCaretSize.x +
+                                                    keyboard.RectSize.x,
+                                                    wordList.RectPosition.y);
+        }
     }
 
-    public void searchTrie(string searchWord){
+    public void searchTrie(string searchWord, HELPER argHelper = HELPER.LONETRIE, bool kbSpace = false){
         //Search Trie for the word the user is currently changing text on.
         predictedText = wordTrie.search(searchWord);
-        itemList.Clear();
-        if(predictedText == null) {//Need to present error handling eventually.
+        wordList.Clear();
+        if(kbSpace == true || (predictedText == null && argHelper == HELPER.KEYBOARD)){
+            GD.Print("No searchable word follows from player's caret pos.");
+            wordList.Visible = true;
+            wordList.AddItem("~");
+            wordList.Select(wordList.GetItemCount() - 1);
+            wordList.EnsureCurrentIsVisible();
+        } else if(predictedText == null) {//Need to present error handling eventually.
             GD.Print("No searchable word follows from player's text.");
-            //itemList.Hide();
-            itemList.Visible = false;
+            //wordList.Hide();
+            wordList.Visible = false;
         } else {
             //GD.Print("Search: ", searchWord);
             List<string> reversedText = new List<string>();
             for(var i = predictedText.Count - 1; i >= 0; i--){
                 //GD.Print("Searched: ", predictedText[i]);
-                //itemList.Show();
-                itemList.Visible = true;
+                //wordList.Show();
                 reversedText.Add(predictedText[i]);
-                itemList.AddItem(predictedText[i], null, true);
+                wordList.AddItem(predictedText[i], null, true);
             }
             if(searchWord != reversedText[0]) {
-                itemList.AddItem(searchWord + "~");
+                wordList.AddItem(searchWord + "~");
                 reversedText.Add(searchWord + "~");
             }
-            listState = LISTSTATE.TRIE;
+            wordList.Visible = true;
+            if(argHelper == HELPER.LONETRIE){
+                helperState = HELPER.LONETRIE;
+            }
             predictedText = reversedText; //Same order for predicted and Item List
-            itemList.Select(predictedText.Count - 1);
-            itemList.EnsureCurrentIsVisible();
+            wordList.Select(wordList.GetItemCount() - 1);
+            wordList.EnsureCurrentIsVisible();
         }
-    }
-    public void getHelper(int selection = -1){
-        itemList.Clear();
-        if(selection == -1) {
-            for(var i = 0; i < textHelper.Count; i++){
-                //itemList.Show();
-                itemList.Visible = true;
-                itemList.AddItem(textHelper[i], null, true);
-            }
-            listState = LISTSTATE.HELPER;
-            itemList.Select(textHelper.Count - 1);
-        } else if(selection >= 0){
-            int storeI = 0;
-            for(var i = textHelper.Count - 1; i >= 0; i--){
-                if(i == selection){
-                    for(var j = textHelper[i].Length - 1; j >= 0; j--){
-                        itemList.Visible = true;
-                        itemList.AddItem(textHelper[i][j].ToString());
-                        storeI = i;
-                    }
-                }
-            }
-            listState = LISTSTATE.DEEPHELPER;
-            itemList.Select(textHelper[storeI].Length - 1);
-        }
-        itemList.EnsureCurrentIsVisible();
     }
 
     //Entered Text Signal
@@ -480,7 +479,7 @@ public class UI : Control
                         GD.Print("Search: ", currentLine[1]);
                         for(var i = predictedText.Count - 1; i >= 0; i--){
                             GD.Print("Searched: ", predictedText[i]);
-                            itemList.AddItem(predictedText[i], null, true);
+                            wordList.AddItem(predictedText[i], null, true);
                         }
                     }
                 }
@@ -488,6 +487,165 @@ public class UI : Control
         }
     }
 }
+
+/*  This goes in _Input() it was for a text helper that initially held
+    An alphabet but then I realized I should just use a keyboard instaed
+    Then I was planning to use it to store pre set sentences with emojis
+    I might still use that idea but for now I don't want to mess with this
+    anymore lol If I decide to come back to it the code is here!!!
+
+else if(wordList.Visible && helperState == HELPER.HELPER){
+                if(key.IsActionPressed("ui_up")) {
+                    selection(textHelper, findSelected(textHelper),
+                                        ACTION.UP);
+                } else if(key.IsActionPressed("ui_down")) {
+                    selection(textHelper, findSelected(textHelper),
+                                    ACTION.DOWN);
+                }
+                if(key.IsActionPressed("ui_left")) {
+                    wordList.Clear();
+                    wordList.Visible = false;
+                    helperState = HELPER.EMPTY;
+                } else if(key.IsActionPressed("ui_right")) {
+                    getHelper(findSelected(textHelper));
+                    GetTree().SetInputAsHandled();
+                } else if(key.IsActionPressed("ui_select")) {
+                    wordList.Clear();
+                    wordList.Visible = false;
+                    helperState = HELPER.EMPTY;
+                }
+            } else if(wordList.Visible && helperState == HELPER.DEEPHELPER){
+                int selected = 0;
+                for(var i = 0; i < textHelper[deepInx].Length; i++){
+                    if(wordList.IsSelected(i)){
+                        selected = i;
+                    }
+                }
+                if(key.IsActionPressed("ui_up")) {
+                    if(selected - 1 < 0){
+                        wordList.Select(textHelper[deepInx].Length - 1);
+                        selected = textHelper[deepInx].Length - 1;
+                    } else {
+                        wordList.Select(selected - 1);
+                        selected += -1;
+                    }
+                    selectedChar = textHelper[deepInx][selected];
+                    GetTree().SetInputAsHandled();
+                } else if(key.IsActionPressed("ui_down")) {
+                    if(selected + 1 >= textHelper[deepInx].Length){
+                        wordList.Select(0);
+                        selected = 0;
+                    } else {
+                        wordList.Select(selected + 1);
+                        selected += 1;
+                    }
+                    selectedChar = textHelper[deepInx][selected];
+                    
+                    string nextText = playerLine.Text;
+                    int charValue = 0;
+                    if(selectedChar != ' ' && !charAdded) {
+                        charAdded = true;
+                        charValue = charAdded ? 1 : 0;
+                        if(playerLine.Text.Length > 0){
+                            nextText = nextText.Substr(0,
+                                playerLine.CaretPosition-1) +
+                                selectedChar.ToString() +
+                                nextText.Substr(playerLine.CaretPosition,
+                                    nextText.Length-1);
+                        } else {
+                            nextText = selectedChar.ToString();
+                        }
+                    } else if(selectedChar != ' ' && charAdded){
+                        charValue = 0;
+                        if(playerLine.Text.Length > 0){
+                            nextText = nextText.Substr(0,
+                                playerLine.CaretPosition-2) +
+                                selectedChar.ToString() +
+                                nextText.Substr(playerLine.CaretPosition,
+                                    nextText.Length-1);
+                        } else {//Text length can't be zero after char is added
+                            nextText = selectedChar.ToString();
+                        }//So this part is unnecessary.
+                    } else if(selectedChar == ' ' && charAdded){
+                        charAdded = false;
+                        charValue = -1; //This part of the code doesn't work yet but I've decided to exclude the text helper for now lol what'dyouknow
+                        if(playerLine.Text.Length > 0){//idk if this would work
+                            nextText = nextText.Substr(0,//if you're deleting to
+                                playerLine.CaretPosition-2) + //Zero
+                                nextText.Substr(playerLine.CaretPosition,
+                                    nextText.Length-1);
+                        } else {//Text length can't be zero after char is added
+                            nextText = selectedChar.ToString();
+                        }//So this part is unnecessary.
+                    }else if(selectedChar == ' ' && !charAdded) {
+                        charAdded = false;
+                        charValue = 0;
+                    }
+
+                    List<string> newWords = nextText.Split(" ").ToList();
+                    setText(singleSpace(newWords),
+                            globalCaret + charValue,
+                            spaceCounter(newWords, globalCaret + charValue));
+                    GetTree().SetInputAsHandled();
+                }
+                wordList.EnsureCurrentIsVisible();
+
+                if(key.IsActionPressed("ui_left")) {
+                    getHelper(deepInx);
+                    GetTree().SetInputAsHandled();
+                } else if(key.IsActionPressed("ui_right")) {
+                    wordList.Clear();
+                    wordList.Visible = false;
+                    helperState = HELPER.EMPTY;
+                    GetTree().SetInputAsHandled();
+                } else if(key.IsActionPressed("ui_select")) {
+                    wordList.Clear();
+                    wordList.Visible = false;
+                    helperState = HELPER.EMPTY;
+                }            
+            } else if(key.IsActionPressed("ui_down")){
+                    newHelper(playerLine.Text, playerLine.CaretPosition);
+                    GetTree().SetInputAsHandled();
+                }
+
+
+                public void getHelper(int selection = -1){ //Not being used for now but maybe it'd be added again later
+        wordList.Clear();
+        if(selection == -1) {
+            for(var i = 0; i < textHelper.Count; i++){
+                //wordList.Show();
+                wordList.Visible = true;
+                wordList.AddItem(textHelper[i], null, true);
+            }
+            helperState = HELPER.HELPER;
+            wordList.Select(textHelper.Count - 1);
+        } else if(selection >= 0){
+            int storeI = 0;
+            for(var i = textHelper.Count - 1; i >= 0; i--){
+                if(i == selection){//I was storing strings of ABCDE here before but I decided to add a better Keyboard lol
+                    for(var j = textHelper[i].Length - 1; j >= 0; j--){
+                        wordList.Visible = true;
+                        wordList.AddItem(textHelper[i][j].ToString());
+                        storeI = i;
+                    }
+                }
+            }
+            deepInx = storeI;
+            helperState = HELPER.DEEPHELPER;
+            wordList.Select(textHelper[storeI].Length - 1);
+        }
+        globalCaret = playerLine.CaretPosition;
+        wordList.EnsureCurrentIsVisible();
+    }
+
+        public void newHelper(string text, int caret){//I meed to read through this
+        currentLine = text.Split(" ").ToList();//Thoroughly eventually.
+        int exactCaret = setText(singleSpace(currentLine), caret,//To make sure
+                spaceCounter(currentLine, caret));//the logic is Flawless 
+        getHelper();//and works just the same as Trie
+        setwordListPos(exactCaret);
+    }
+            */
 
 /*//Vector2 textSize = Vector2.Zero; //Originally intended to limit
         //How much the user can type by checking via the StringSize
