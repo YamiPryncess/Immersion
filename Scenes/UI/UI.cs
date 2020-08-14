@@ -2,71 +2,34 @@ using Godot;
 using System.Linq;
 using System.Collections.Generic;
 
-public class UI : Control
-{   //Objects (Functionality from outside this class)
-    
-
-    Master master; //Changes player control state
-    LineEdit playerLine; //To change the Line Edit Text
-    Font playerFont; //To measure font, requires currently used font
-    ItemList wordList; //To display predictive text
-    WordTrie wordTrie; //To predict text (Can also store new words)
-    //Unchanging Structures (Internal Functionality)
-    Panel keyboard;
+public class UI : Control {
+    [Signal]
+    public delegate void WordSelected();
     public enum HELPER{ LONETRIE, EMPTY, KEYBOARD }
-    HELPER helperState = HELPER.EMPTY;
     public enum ACTION{ UP, DOWN, LEFT, RIGHT, UNKNOWN }
     public enum EFFECT{ CHANGETEXT, JUSTSTORE, UNKNOWN}
-    List<string> textHelper;//Not being used anymore
+    HELPER helperState = HELPER.EMPTY;
 
-    //In Godot there are multiple processes that code is transfered between.
-    //I took a Functional Programming Approach for this script.
-    //Caution 1
-    //Because functions are reusable if I were to mutate these variables in them
-    //Then use the functions in the wrong order the code would break.
-    //Since variables in 1 function depend on variables from another.
-
-    //Caution 2
-    //If a variable gets set at a particular event. It shouldn't change until
-    //That event happens again. If you reuse the function that sets it
-    //In a place other than than where it's set in the event the code will also
-    //break. Regardless if it's in the same process or another process.
+    //Objects (Functionality from outside this class)
+    Master master; //Changes player control state
+    PlayerLine playerLine; //To change the Line Edit Text
+    ItemList wordList; //To display predictive text
+    WordTrie wordTrie; //To predict text (Can also store new words)
+    Panel keyboard;
     
-    //Caution 3
-    //Upon making the selectedIncomplete Variable I realized that
-    //If I don't use the function that sets the variable every time the
-    //necessary event happens. Then I won't have the variable set as it
-    //needs to be.
-
-    //To prevent that I made a mutation rules for functions that:
-
-    //1 Are self contained with the event where mutation should happen
-    //For example setText() should change caret position every single time.
-    //By doing that you can record the recent caret position even if the player
-    //Moves it without typing.
-
-    //2 Aren't self contained and could be reused and changed by mistake.
-    //In this case there is a Mutation Option on those functions that can be
-    //Switched on and off to say whether this was the intended call to set those
-    //Variables or if it wasn't. The only time originWord should be changed is
-    //When something new is typed for example. findCurWord() changes it upon
-    //text change which is cool but when findCurWord is called in _Input()
-    //It should not be changed so you switch the MO to off.
-    
-    //Central Structures (No M.O. because they change only when they should.
-    List<string> predictedText; //By cycle I mean the next time the player types
-    List<string> currentLine; //We store what the player types in here
-    int globalCaret; //I made the newSearch code not depend on this anymore.
-    //int deepInx; //I was using this to access contents inside of text helper
-    bool charAdded = false; //Stored to check whether value is already 1 or not
-    string selectedWord = ""; //Only used when _Input() needs it.
-    char selectedChar = ' ';//Because calling char's words bothers me lol
-    bool selectedIncomplete = false; //Exclusively set by cleanWord()
-    //So you can never select a word without using cleanWord() I guess that's
-    //Another mutation difficulty but I'm fine with it since it's needed really.
-
-    //Mutating Variables (M.O. because they could change when they shouldn't)
+    //Event Signal Variables, Only mutated when a particular event happens
     List<List<int>> detales;
+    List<string> currentLine; //We store the words the player typed in here
+    string searchWord = "";
+
+    //Procedural Variables, Mutated/Used in events/input/process, not for FP Code.
+    string selectedWord = ""; //Only used/mutated when _Input() needs it.
+
+    //Mutated in Non-Top Level Function Code. This should be cleaned up eventually.
+    //Top Level would be the process functions and events.
+    //Since they always run procedurally.
+    List<string> predictedText; //This variable probably isn't needed if I can just get the items from itemlist instead
+    bool selectedIncomplete = false;//Both these variables only change when they need to so I'm leaving them for now.
 
     //Class Utility
     [Export] bool debug = false;
@@ -74,8 +37,7 @@ public class UI : Control
     //==================GODOT VIRTUALS======================
     public override void _Ready(){
         master = GetTree().Root.GetNode<Master>("Master");
-        playerLine = (LineEdit)GetNode("PlayerLine");
-        playerFont = playerLine.GetFont(""); //Needs actual current font
+        playerLine = GetNode<PlayerLine>("PlayerLine");
         wordList = (ItemList)GetNode("PlayerLine/WordList");
         keyboard = (Panel)GetNode("PlayerLine/Keyboard");
         //wordList.Hide();
@@ -94,33 +56,6 @@ public class UI : Control
         for(int i = 0; i < words.Length; i++){
             wordTrie.insert(words[i]);
         }
-
-        textHelper = new List<string>(){
-            "Shortcuts2",
-            "Shortcuts1",
-            "Fear",
-            "Anger",
-            "Concern",
-            "Sadness",
-            "Happiness",
-            "Assertions",
-            "Questions",
-            "Commands",
-            "Judgement",
-            "Feelings"
-        };
-
-        /*feelings = new List<string>(){
-            "Shortcuts3",
-            "Shortcuts2",
-            "Shortcuts1",
-            "Assertions",
-            "Questions",
-            "Commands",
-            "Judgement",
-            "I'm glad. :)"
-        };*/
-
     }
 
     public override void _Process(float delta){
@@ -271,8 +206,8 @@ public class UI : Control
                 } else {//If it bugs and root node becomes selectable.
                     selectedWord = cleanWord(prevSelection);
                 }//singleSpace() will crash upon reading it.
-                string nextText = singleSpace(lineWords);
-                setText(nextText, detales[0][5] + selectedWord.Length);
+                string nextText = playerLine.singleSpace(lineWords);
+                playerLine.setText(nextText, detales[0][5] + selectedWord.Length);
             }
             wordList.EnsureCurrentIsVisible();
         }
@@ -305,10 +240,14 @@ public class UI : Control
         }
     }
 
-    public void _on_PlayerLine_CaretChanged() {
-        /*List<string> lineWords = playerLine.Text.Split(" ").ToList();
-        originWord = cleanWord(lineWords[i]);
-        selectedWord = cleanWord(lineWords[i]);*/
+    public void _on_UI_WordSelected() {
+        detales = playerLine.detailedCounter();
+        currentLine = playerLine.Text.Split(" ").ToList();
+        searchWord = "";
+        if(currentLine.Count > 0){
+            searchWord = currentLine[detales[0][4]];
+            selectedWord = searchWord;
+        }
     }
 
     public void _on_PlayerLine_text_entered(string text) {
@@ -322,46 +261,34 @@ public class UI : Control
     }
     //Changed Text Signal
     public void newSearch(string text, int caret){
-        currentLine = text.Split(" ").ToList();
-        List<List<int>> details = detailedCounter();
-        setText(singleSpace(currentLine), caret, details[0][9]);
-        details = detailedCounter();
-        currentLine = playerLine.Text.Split(" ").ToList();
-        string currentWord = "";
-        if(currentLine.Count > 0){
-            currentWord = currentLine[details[0][4]];
-            selectedWord = currentLine[details[0][4]];
-        }
-        searchTrie(currentWord);
-        setHelperPos(getStringSize(details[0][5]), HELPER.LONETRIE);
-        detales = details;
+        List<string> lineWords = text.Split(" ").ToList();
+        List<List<int>> details = playerLine.detailedCounter();
+        playerLine.setText(playerLine.singleSpace(lineWords), caret, details[0][9]);
+        EmitSignal(nameof(WordSelected));
+        searchTrie(searchWord);
+        setHelperPos(playerLine.getStringSize(detales[0][5]), HELPER.LONETRIE);
     }
     public void newKeyboard(string text, int caret, bool oldKeyboard = false){
-        currentLine = text.Split(" ").ToList();
+        List<string> lineWords = text.Split(" ").ToList();
         int exactCaret = 0;
-        List<List<int>> details = detailedCounter();
+        List<List<int>> details = playerLine.detailedCounter();
 
         if(text.Length > 0){
-            exactCaret = setText(singleSpace(currentLine), caret,
+            exactCaret = playerLine.setText(playerLine.singleSpace(lineWords), caret,
                                     details[0][9]);
         }
+        EmitSignal(nameof(WordSelected));
         keyboard.Visible = true;
         string pText = playerLine.Text;
-        currentLine = playerLine.Text.Split(" ").ToList();
-        string currentWord = "";
-        if(currentLine.Count > 0){
-            currentWord = currentLine[details[0][4]];
-            selectedWord = currentLine[details[0][4]];
-        }
         if((exactCaret > 0 && pText[exactCaret-1] == ' ')){//> 0 is a error handler            
-            searchTrie(currentWord, HELPER.KEYBOARD, true);
-            setHelperPos(getStringSize(exactCaret), HELPER.KEYBOARD, oldKeyboard);
+            searchTrie(searchWord, HELPER.KEYBOARD, true);
+            setHelperPos(playerLine.getStringSize(exactCaret), HELPER.KEYBOARD, oldKeyboard);
         } else if(exactCaret > 0 && pText[exactCaret-1] != ' '){
-            searchTrie(currentWord, HELPER.KEYBOARD, false);            
-            setHelperPos(getStringSize(details[0][5]), HELPER.KEYBOARD, oldKeyboard);
+            searchTrie(searchWord, HELPER.KEYBOARD, false);            
+            setHelperPos(playerLine.getStringSize(detales[0][5]), HELPER.KEYBOARD, oldKeyboard);
         } else if(exactCaret == 0) {
-            searchTrie(currentWord, HELPER.KEYBOARD, true);
-            setHelperPos(getStringSize(details[0][5]), HELPER.KEYBOARD, oldKeyboard);
+            searchTrie(searchWord, HELPER.KEYBOARD, true);
+            setHelperPos(playerLine.getStringSize(detales[0][5]), HELPER.KEYBOARD, oldKeyboard);
         }
         helperState = HELPER.KEYBOARD;
         if(!oldKeyboard) {
@@ -385,155 +312,6 @@ public class UI : Control
     //up the whole list. Incomplete words are at the top and you press right on
     //them to search for them after searching for them from the origin word that
     //was typed.)
-
-    public List<List<int>> detailedCounter(bool selectBehindWord = true){        
-        int b4CaretSpaces = 0; //return value 0
-        
-        int introSpaces = 0; //return value 1
-        int middleSpaces = 0; //return value 2
-        int endSpaces = 0; //return value 3
-
-        bool wordInxBool = false;
-        int wordInx = 0; //return value 4
-        int tillWord = 0; //return value 5
-        int b4CaretLetters = 0; //return value 6
-        int allLetters = 0; //return value 7
-
-        bool b4CaretCleanSpaced = true; //return value 8
-        int b4CaretSingles = 0;
-
-        int inbetweenSpaces = 0;
-        int spacesToRemove = 0; //return value 9
-
-        List<int> results;
-        List<int> wordPos = new List<int>();
-        bool wordPosBool = false; //Does the same thing as wordInx bool but just to be safe.
-
-        string text = playerLine.Text;
-        int caret = playerLine.CaretPosition;
-
-        if(text.Length > 0){
-            for(var i = 0; i < text.Length; i++){
-                if(i == introSpaces && text[i] == ' '){
-                    introSpaces++;//Count Intro Spaces
-                    b4CaretCleanSpaced = false;//Opening spaces means text isn't cleanly spaced
-                    if(text.Length - 1 == i){//There are no letters till end
-                        endSpaces = -1;//End & Start spaces shouldn't be the same
-                    }
-                }
-                
-                if(text[i] == ' ') {
-                    endSpaces++;//End Spaces will be sent to middle spaces
-                    b4CaretSingles++;//Is counting if words are cleanly spaced
-
-                    if(i + 1 == caret) {
-                        if(b4CaretSingles > 1){//Found caret in spaces & unclean
-                            b4CaretCleanSpaced = false;
-                        }//Double Space != Cleanly Spaced
-                        b4CaretSpaces += b4CaretSingles;//Add to total b4Caret
-                        b4CaretSingles = 0;//Keep counting until before caret
-                    }
-                    if(i < caret && wordInxBool == true) {
-                        wordInxBool = false;//You're not on a word anymore
-                    }
-                    if(wordPosBool == true) {
-                        wordPosBool = false;//Same as wordInx, working separately
-                    }
-                }
-                
-                if(text[i] != ' ') {
-                    if(introSpaces != i) {//Middle should not get intro spaces
-                        middleSpaces += endSpaces;
-                    }
-                    endSpaces = 0;//Keep looking for the end or give to middle
-
-                    if(i < caret) { //While still behind caret
-                        if(b4CaretSingles > 1){//Just came from spaces & unclean
-                            b4CaretCleanSpaced = false;
-                        }
-                        b4CaretSpaces += b4CaretSingles;
-                        b4CaretSingles = 0;//Add to before spaces and continue
-                    }
-                    if(i < caret && wordInxBool == false) {
-                        wordInxBool = true;
-                        wordInx++;//If caret is in or right after current word
-                    } else if((i == caret && selectBehindWord) &&
-                                        wordInxBool == false){
-                        wordInxBool = true;
-                        wordInx++;//If caret is right behind 1st letter
-                    }
-                    if(i < caret) {//Count all letters
-                        b4CaretLetters++;
-                        allLetters++;
-                    } else {
-                        allLetters++;
-                    }
-                    if(wordPosBool == false) {
-                        wordPos.Add(i);//If on first letter
-                        wordPosBool = true;
-                    }
-                }
-            }
-        }
-        wordInx = wordInx == 0 ? 0 : wordInx-1;
-        tillWord = wordPos.Count > 0 ? (wordPos[wordInx] > 0 ? wordPos[wordInx] : 0) : 0;
-        inbetweenSpaces = (wordInx > 1) ? wordInx : wordInx;
-        spacesToRemove = b4CaretSpaces - inbetweenSpaces;
-        results = new List<int>(){b4CaretSpaces, introSpaces, middleSpaces, endSpaces, wordInx, tillWord, b4CaretLetters, allLetters, b4CaretCleanSpaced ? 1 : 0, spacesToRemove};
-        /*GD.Print("Details-\n", "\nb4CaretSpaces: ", b4CaretSpaces,
-        "\nintroSpaces: ", introSpaces, "\nmiddleSpaces: ", middleSpaces,
-        "\nendSpaces: ", endSpaces, "\nwordInx: ", wordInx,
-        "\ntillWord: ", tillWord, "\nb4CaretLetters: ", b4CaretLetters,
-        "\nallLetters: ", allLetters, "\nb4CaretCleanSpaced: ", b4CaretCleanSpaced ? 1 : 0,
-        "\nSpacesToRemove: ", spacesToRemove);*/
-        /*GD.Print("Word Positions");
-        for(var i = 0; i < wordPos.Count; i++) {
-            GD.Print(wordPos[i]);
-        }*/
-
-        return new List<List<int>>(){results, wordPos};
-    }
-
-    public string singleSpace(List<string> lineWords) {
-        string text = "";//if I remove singleSpace then I'll have to make more
-        string lineText = playerLine.Text;//Code to handle backspace behavior
-        if(lineWords.Count > 0 && lineText.Length > 0) {//backspace at the
-            for(var i = 0; i < lineWords.Count; i++){//beginning of a word
-                if(i == 0 && lineWords[i].Length > 0){//won't reset the listPos
-                    text += lineWords[i];
-                } else if(lineWords[i].Length > 0){
-                    text += " " + lineWords[i];
-                } else {
-                    //handle the error? abort everything???
-                    //for now let's just leave it like this
-                    //I think it'll count for the previous word
-                    //If there is no previous word idk what
-                    //would happen though
-                }
-            }
-            if(lineText[lineText.Length - 1] == ' '){
-                text += " ";
-            }
-        }
-        return text;
-    }
-
-    public int setText(string nextText, int caret, int removedSpaces = 0){
-        //Reset the text
-        playerLine.Text = nextText;
-        playerLine.CaretPosition = caret - removedSpaces;
-        //EmitSignal(nameof(CaretChanged));
-        return playerLine.CaretPosition;
-    }
-    public Vector2 getStringSize(int tillWordAtCaret) {
-        Vector2 textToCaretSize = Vector2.Zero;
-        //Move Item List to the word that the caret is on.
-        if(playerLine.Text.Length > 0){
-            textToCaretSize = playerFont.GetStringSize(playerLine.Text.Substr(0,
-                                                tillWordAtCaret));
-        }
-        return textToCaretSize;
-    }
 
     public void setHelperPos(Vector2 textToCaretSize, HELPER helperState, bool oldKeyboard = false) {
         if(helperState == HELPER.LONETRIE){
@@ -621,70 +399,12 @@ public class UI : Control
     }
 }
 
-/*     public int spaceCounter(List<string> lineWords, int caret){//For deleting spaces to make a new caret position
-        int spacesTillCaret = 0;
-        string lineText = playerLine.Text;
-        bool space = true;
-        bool startCounting = true; //Skips the first space after each word
-        int countInd = 0;
+/*
 
-        if(lineWords.Count > 0){//Depends on currentline not being empty
-            //Count the text
-            for(var i = 0; i < lineText.Length; i++){
-                if(lineText[i] != ' ' && space == true){
-                    //wordCount[countInd] = i;
-                    space = false;
-                } else if(lineText[i] == ' ' && space == false) {
-                    space = true;
-                    startCounting = true;//Skip the first space after each word
-                    countInd++;
-                } else if(startCounting == true) { //Only count beginning spaces and 2 spaces after each word.
-                    if(space == true && i < caret) {
-                        spacesTillCaret++;
-                    }
-                }
-            }
-        }
-        return spacesTillCaret;
-    }    
-
-public string[] findCurWord(bool certainSpacing = false) { //if certain spacing is true that means we're certain it's single spaced.
-        List<string> lineWords = playerLine.Text.Split(" ").ToList();
-        int caret = playerLine.CaretPosition;
-        string currentWord = ""; //This method is dependent on proper spacing at the moment. Idk if I'll keep it like that.
-        List<int> wordCount = new List<int>();
-        int tillWordAtCaret = 0;
-        int lastIndex = 0;
-        
-        if(lineWords.Count > 0){//Depends on lineWords not being empty
-            //Find the caret position and check what word it's on.
-            for(var i = 0; i < lineWords.Count; i++){
-                if(tillWordAtCaret + lineWords[i].Length + 1 < caret){
-                    tillWordAtCaret += lineWords[i].Length + 1;
-                } else {
-                    lastIndex = i;
-                    currentWord = lineWords[i];
-                    break;
-                }
-            }
-        }
-        return new string[]{currentWord, tillWordAtCaret.ToString(), lastIndex.ToString()};
-    }
-
-comments from find cur word
-
-                //Caution, Spaces in front of words count as previous word
-                //and not following word even if the caret was touching the
-                //following word from behind. + 1 counts for 1 separating space.
-                //I might change this later to count the space behind instead of in front.
-
-//To return to other functions
-                    if(mutate) { //If I called this function for a word that
-                    //wasn't the original I'd mess up the originWord variable.
-                    //That's why not mututing external stuff in functions is
-                    //so important. We only store it for the whole class when
-                    //A new Item List is to be created from this info. 
-
+//Old Clean Word Comments 
+//Exclusively set by cleanWord()
+    //So you can never select a word without using cleanWord() I guess that's
+    //Another mutation difficulty but I'm fine with it since it's needed really.    
 
 This goes in _Input() it was for a text helper that initially held
     An alphabet but then I realized I should just use a keyboard instaed
@@ -844,69 +564,3 @@ else if(wordList.Visible && helperState == HELPER.HELPER){
         setwordListPos(exactCaret);
     }
             */
-
-/*//Vector2 textSize = Vector2.Zero; //Originally intended to limit
-        //How much the user can type by checking via the StringSize
-        //Rather than by the amount of characters.
-
-        //textSize = playerFont.GetStringSize(playerLine.Text);
-        
-        //Yikes we might have to word count how many letters to
-        //delete by calling the size over and over again. Deleting
-        from the end wouldn't be cool though. I need a new algorithm that
-        //doesn't limit spaces and instead checks for the spot where the
-        //user last typed at and instead deletes that character. Idk if
-        //there is some sort of glitch they can do to make it multiple
-        //characters past size though lol */
-
-
-/*                    selectedWord = predictedText[selected];
-                    string selectedText = newText.Substr(0, sentenceLengthTillWordAtCaret-1);
-                    selectedText += selectedWord;
-                    selectedText += newText.Substr(sentenceLengthTillWordAtCaret +
-                                    selectedWord.Length - 1, newText.Length - 1);
-                    newText = selectedText;
-                    playerLine.Text = selectedText;
-                    playerLine.CaretPosition = sentenceLengthTillWordAtCaret + selectedWord.Length - 1;
-                    
-                    selectedWord = predictedText[selected];
-                    string selectedText = newText.Substr(0, sentenceLengthTillWordAtCaret-1);
-                    selectedText += selectedWord;
-                    selectedText += newText.Substr(sentenceLengthTillWordAtCaret +
-                                    selectedWord.Length - 1, newText.Length - 1);
-                    newText = selectedText;
-                    playerLine.Text = selectedText;
-                    playerLine.CaretPosition = sentenceLengthTillWordAtCaret + selectedWord.Length - 1;*/
-
-                    
-    /*  string newText = nextText;
-        int caretSpace = 0;
-            public string includePrecedingSpace(string nextText, int prevCaret) {
-        string lineText = playerLine.Text;
-        string newText = "";
-        // if(prevCaret != 1 && lineText[0] != ' '){
-            
-        // }
-        
-        // if((nextText.Length == prevCaret &&
-        //             lineText[nextText.Length - 1] == ' ') ||
-        //                 (nextText.Length + 1 == prevCaret) &&
-        //                     lineText[nextText.Length] == ' ') {
-                                
-        // }
-        return newText;
-    }
-        if(allowCaretSpace == true) {
-            newText = includePrecedingSpace(nextText, prevCaret);
-            if(newText.Length > nextText.Length) {
-                caretSpace++;
-            } 
-        } 
-    
-    
-    includeStartingSpace(lineText, prevCaret)
-        
-        else if(i != lineWords.Count - 1 &&
-                includePrecedingSpace(text, lineText, prevCaret)) { 
-                    text += "  " + lineWords[i];
-            }*/

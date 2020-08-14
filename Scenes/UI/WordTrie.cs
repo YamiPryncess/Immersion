@@ -43,7 +43,7 @@ public class WordTrie : Node{
         return true;
     }
 
-    public TrieNode findWord(string word) {
+    public TrieNode findInfo(string word) {
         TrieNode node = rootNode;
 
         for(int i = 0; i < word.Length; i++) {

@@ -397,7 +397,7 @@ text = "Zz"
 
 [node name="WordTrie" type="Node" parent="UI"]
 script = ExtResource( 1 )
-[connection signal="CaretChanged" from="UI/PlayerLine" to="UI" method="_on_PlayerLine_CaretChanged"]
+[connection signal="WordSelected" from="UI" to="UI" method="_on_UI_WordSelected"]
 [connection signal="text_change_rejected" from="UI/PlayerLine" to="UI" method="_on_PlayerLine_text_change_rejected"]
 [connection signal="text_changed" from="UI/PlayerLine" to="UI" method="_on_PlayerLine_text_changed"]
 [connection signal="text_entered" from="UI/PlayerLine" to="UI" method="_on_PlayerLine_text_entered"]
