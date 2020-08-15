@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 public class PlayerLine : LineEdit
 {
+    public enum POSITION{ INSIDE, OUTSIDE, LEFT, RIGHT, ZERO }
     Font playerFont; //To measure font, requires currently used font
     public override void _Ready()
     {
@@ -56,17 +57,36 @@ public class PlayerLine : LineEdit
         return text;
     }
 
+    public POSITION positionCheck( ) {//Needs testing
+        if(Text.Length > 0){
+            if((CaretPosition == 0 || Text[CaretPosition-1] == ' ') && 
+            (Text.Length == CaretPosition || Text[CaretPosition] == ' ')) {
+                return POSITION.OUTSIDE;
+            } else if((CaretPosition == 0 || Text[CaretPosition-1] != ' ') && 
+            (Text.Length == CaretPosition || Text[CaretPosition] != ' ')) {
+                return POSITION.INSIDE;
+            } else if((CaretPosition == 0 || Text[CaretPosition-1] != ' ') && 
+            (Text.Length == CaretPosition || Text[CaretPosition] == ' ')){
+                return POSITION.LEFT;
+            } else if((CaretPosition == 0 || Text[CaretPosition-1] == ' ') && 
+            (Text.Length == CaretPosition || Text[CaretPosition] != ' ')){
+                return POSITION.RIGHT;
+            }
+        }
+        return POSITION.ZERO; //Either it is zero & empty, or it's an error.
+    }
+
 public List<List<int>> detailedCounter(bool selectBehindWord = true){        
-        int b4CaretSpaces = 0; //return value 0
-        
-        int introSpaces = 0; //return value 1
-        int middleSpaces = 0; //return value 2
-        int endSpaces = 0; //return value 3
+        int b4CaretSpaces = 0; //return value 0 -Only accurate till caret moves.
+                                            //Should this be reset every move?
+        int introSpaces = 0; //return value 1           //Maybe Not
+        int middleSpaces = 0; //return value 2          //I call it de"tales"
+        int endSpaces = 0; //return value 3             //Since it can be dated
 
         bool wordInxBool = false;
         int wordInx = 0; //return value 4
         int tillWord = 0; //return value 5
-        int b4CaretLetters = 0; //return value 6
+        int b4CaretLetters = 0; //return value 6 -Only accurate till caret moves.
         int allLetters = 0; //return value 7
 
         bool b4CaretCleanSpaced = true; //return value 8
@@ -74,6 +94,8 @@ public List<List<int>> detailedCounter(bool selectBehindWord = true){
 
         int inbetweenSpaces = 0;
         int spacesToRemove = 0; //return value 9
+
+        int tillWordEnd = 0; //return value 10
 
         List<int> results;
         List<int> wordPos = new List<int>();
@@ -145,11 +167,12 @@ public List<List<int>> detailedCounter(bool selectBehindWord = true){
                 }
             }
         }
-        wordInx = wordInx == 0 ? 0 : wordInx-1;
+        wordInx = wordInx == 0 ? 0 : wordInx-1;//Last occurence of a word before caretPos.
         tillWord = wordPos.Count > 0 ? (wordPos[wordInx] > 0 ? wordPos[wordInx] : 0) : 0;
+        tillWordEnd = tillWord + text.Split(" ")[wordInx].Length-1; //Needs Testing
         inbetweenSpaces = (wordInx > 1) ? wordInx : wordInx;
         spacesToRemove = b4CaretSpaces - inbetweenSpaces;
-        results = new List<int>(){b4CaretSpaces, introSpaces, middleSpaces, endSpaces, wordInx, tillWord, b4CaretLetters, allLetters, b4CaretCleanSpaced ? 1 : 0, spacesToRemove};
+        results = new List<int>(){b4CaretSpaces, introSpaces, middleSpaces, endSpaces, wordInx, tillWord, b4CaretLetters, allLetters, b4CaretCleanSpaced ? 1 : 0, spacesToRemove, tillWordEnd};
         /*GD.Print("Details-\n", "\nb4CaretSpaces: ", b4CaretSpaces,
         "\nintroSpaces: ", introSpaces, "\nmiddleSpaces: ", middleSpaces,
         "\nendSpaces: ", endSpaces, "\nwordInx: ", wordInx,

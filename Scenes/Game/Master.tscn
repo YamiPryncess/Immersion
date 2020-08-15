@@ -401,6 +401,7 @@ script = ExtResource( 1 )
 [connection signal="text_change_rejected" from="UI/PlayerLine" to="UI" method="_on_PlayerLine_text_change_rejected"]
 [connection signal="text_changed" from="UI/PlayerLine" to="UI" method="_on_PlayerLine_text_changed"]
 [connection signal="text_entered" from="UI/PlayerLine" to="UI" method="_on_PlayerLine_text_entered"]
+[connection signal="pressed" from="UI/PlayerLine/Keyboard/KeyGrid/Aa" to="UI" method="_on_Key_pressed"]
 
 [editable path="Flatplane/Lynn"]
 

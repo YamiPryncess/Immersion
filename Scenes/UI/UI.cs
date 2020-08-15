@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class UI : Control {
     [Signal]
-    public delegate void WordSelected();
+    public delegate void WordSelected(bool nextSearch);
     public enum HELPER{ LONETRIE, EMPTY, KEYBOARD }
     public enum ACTION{ UP, DOWN, LEFT, RIGHT, UNKNOWN }
     public enum EFFECT{ CHANGETEXT, JUSTSTORE, UNKNOWN}
@@ -32,14 +32,16 @@ public class UI : Control {
     bool selectedIncomplete = false;//Both these variables only change when they need to so I'm leaving them for now.
 
     //Class Utility
+    [Export] bool allowSpaces = true;
     [Export] bool debug = false;
 
-    //==================GODOT VIRTUALS======================
+    //============EVENT SIGNALS AND VIRTUALS======================
     public override void _Ready(){
         master = GetTree().Root.GetNode<Master>("Master");
         playerLine = GetNode<PlayerLine>("PlayerLine");
         wordList = (ItemList)GetNode("PlayerLine/WordList");
         keyboard = (Panel)GetNode("PlayerLine/Keyboard");
+        detales = new List<List<int>>();
         //wordList.Hide();
         wordList.Visible = false;
         keyboard.Visible = false;
@@ -58,17 +60,61 @@ public class UI : Control {
         }
     }
 
+    public void _on_PlayerLine_text_changed(string text){
+        int caret = playerLine.CaretPosition;
+        if(helperState == HELPER.KEYBOARD){
+            playerLine.GrabFocus();
+            helperState = HELPER.EMPTY;
+            keyboard.Visible = false;
+            wordList.Visible = false;
+            wordList.Clear();
+        }
+        if(text.Length > 0){
+            if((caret > 0 && text[caret-1] == ' ') || caret == 0){
+                return;
+            }
+            //if(helperState == HELPER.KEYBOARD) { //Might include alternating 
+            //typing to keep the kb helper when you switch to the 
+            //computer keyboard. Might not, the problem is that then I'd have 
+            //to make a lot more calculations for where the caret goes and how 
+            //space and backspace should behave.
+                //newKeyboard(text, caret, true);
+                //return;
+            //}
+            
+            newSearch(text, caret);
+        }
+    }
+
+    public void _on_UI_WordSelected(bool nextSearch) {
+        detales = playerLine.detailedCounter();
+        currentLine = playerLine.Text.Split(" ").ToList();
+        if(nextSearch){
+            searchWord = "";
+            int pCaret = playerLine.CaretPosition;
+            if(currentLine.Count > 0){
+                if(pCaret <= detales[0][10]+1){//Not sure how this change would 
+                    searchWord = currentLine[detales[0][4]];//Interact with
+                    selectedWord = searchWord;//The rest of the class
+                    GD.Print(searchWord);
+                }
+            }
+        }
+    }
+
+    public void _on_PlayerLine_text_entered(string text) {
+        if(debug == true) {
+            debugTrie(text);
+        }
+    }
+
+    public void _on_PlayerLine_text_change_rejected() {
+
+    }
+
+    //==============Virtual Processes================
     public override void _Process(float delta){
         input();
-        /*if(helperState == HELPER.KEYBOARD && (!keyboard.HasFocus() || !wordList.HasFocus())) {
-            wordList.Clear();
-            wordList.Visible = false;
-            keyboard.Visible = false;
-            selectedWord = "";
-            helperState = HELPER.EMPTY;
-        }*/ //This if statement didn't work cause it's the individual keys that
-        //have focus. Instead I'll just keep the keyboard to allow for caret movement
-        //The player can just disable it manually.
     }
     //Entry Input Handler
     public override void _Input(InputEvent @event){
@@ -109,27 +155,43 @@ public class UI : Control {
                     helperState = HELPER.EMPTY;
                 }
             } else if(wordList.Visible && helperState == HELPER.KEYBOARD){
-                /*if(key.IsActionPressed("ui_left")) { //Copy pasted but not editted yet
-                    if(playerLine.CaretPosition-1 < beforeWord) {
-                        wordList.Clear();
-                        wordList.Visible = false;
-                        selectedWord = "";
-                        helperState = HELPER.EMPTY;
-                    }
-                } else if(key.IsActionPressed("ui_right")) {
-                    if(playerLine.CaretPosition+1 > 
-                        beforeWord + selectedWord.Length){
-                            if(selectedIncomplete){
-                                searchTrie(selectedWord);
-                                GetTree().SetInputAsHandled();
-                            } else {                    
-                                wordList.Clear();
-                                wordList.Visible = false;
-                                selectedWord = "";
-                                helperState = HELPER.EMPTY;
+                if(key.IsActionPressed("ui_left")) { //Copy pasted but not editted yet
+                    if(playerLine.HasFocus() && ((playerLine.CaretPosition-1 < 
+                        detales[0][5]) || (detales[0][10] <= playerLine.CaretPosition-1))) {
+                            wordList.Clear();
+                            wordList.AddItem("~");                            
+                            wordList.Select(wordList.GetItemCount() - 1);
+                            wordList.EnsureCurrentIsVisible();
+                            playerLine.CaretPosition--;//Can caret position go beyond zero?
+                            GetTree().SetInputAsHandled();
+                            PlayerLine.POSITION nextPos = playerLine.positionCheck();
+                            if(nextPos == PlayerLine.POSITION.OUTSIDE){
+                                setHelperPos(playerLine.getStringSize(playerLine.CaretPosition),
+                                                                        HELPER.KEYBOARD, "");
+                            } else {
+                                newKeyboard(playerLine.Text,
+                                                playerLine.CaretPosition, true);
                             }
                     }
-                }*/
+                } else if(key.IsActionPressed("ui_right")) {
+                    if(playerLine.HasFocus() && playerLine.CaretPosition > 
+                        detales[0][5] + selectedWord.Length - 1){
+                            wordList.Clear();
+                            wordList.AddItem("~");                            
+                            wordList.Select(wordList.GetItemCount() - 1);
+                            wordList.EnsureCurrentIsVisible();
+                            playerLine.CaretPosition++;//Can caret position go beyond the end?
+                            GetTree().SetInputAsHandled();
+                            PlayerLine.POSITION nextPos = playerLine.positionCheck();
+                            if(nextPos == PlayerLine.POSITION.OUTSIDE){ 
+                                setHelperPos(playerLine.getStringSize(playerLine.CaretPosition),
+                                        HELPER.KEYBOARD, "");
+                            } else {
+                                newKeyboard(playerLine.Text,
+                                                playerLine.CaretPosition, true);
+                            }
+                    }
+                }
             } else if(!wordList.Visible) {
                 if(key.IsActionPressed("ui_up")) {
                     if(playerLine.Text.Length > 0 && 
@@ -145,6 +207,9 @@ public class UI : Control {
             }
         }
     }
+
+    //==========Update Methods============
+
     //Process Input Map -> Finishing Input Handler
     public void input(){
         if (Input.IsActionJustPressed("interact")){
@@ -206,90 +271,64 @@ public class UI : Control {
                 } else {//If it bugs and root node becomes selectable.
                     selectedWord = cleanWord(prevSelection);
                 }//singleSpace() will crash upon reading it.
-                string nextText = playerLine.singleSpace(lineWords);
-                playerLine.setText(nextText, detales[0][5] + selectedWord.Length);
-            }
+
+                if(!allowSpaces){
+                    string nextText = playerLine.singleSpace(lineWords);
+                    playerLine.setText(nextText, detales[0][5] + selectedWord.Length,
+                                                                detales[0][9]);
+                    EmitSignal(nameof(WordSelected), false);
+                } else {
+                    string pText = playerLine.Text;
+                    string includesWord = selectedWord;
+                    if(detales[0][5] > 0){
+                        string beforeWord = pText.Substr(0, detales[0][5]);
+                        includesWord = beforeWord + selectedWord;
+                    }
+                    string afterWord = pText.Substr(detales[0][5]+
+                            prevSelection.Length, playerLine.Text.Length-1);
+                    string nextText = includesWord + afterWord;
+                    
+                    playerLine.setText(nextText, detales[0][5] + selectedWord.Length);
+                    EmitSignal(nameof(WordSelected), false);
+                }//Could make a caret changed signal to update detales caret info
+            }//every time it changes instead of using WordSelected(!newSearch);
             wordList.EnsureCurrentIsVisible();
         }
     }
 
-    //=================Signal Methods=================
-    public void _on_PlayerLine_text_changed(string text){
-        int caret = playerLine.CaretPosition;
-        if(helperState == HELPER.KEYBOARD){
-            playerLine.GrabFocus();
-            helperState = HELPER.EMPTY;
-            keyboard.Visible = false;
-            wordList.Visible = false;
-            wordList.Clear();
-        }
-        if(text.Length > 0){
-            if((caret > 0 && text[caret-1] == ' ') || caret == 0){
-                return;
-            }
-            //if(helperState == HELPER.KEYBOARD) { //Might include alternating 
-            //typing to keep the kb helper when you switch to the 
-            //computer keyboard. Might not, the problem is that then I'd have 
-            //to make a lot more calculations for where the caret goes and how 
-            //space and backspace should behave.
-                //newKeyboard(text, caret, true);
-                //return;
-            //}
-            
-            newSearch(text, caret);
-        }
-    }
-
-    public void _on_UI_WordSelected() {
-        detales = playerLine.detailedCounter();
-        currentLine = playerLine.Text.Split(" ").ToList();
-        searchWord = "";
-        if(currentLine.Count > 0){
-            searchWord = currentLine[detales[0][4]];
-            selectedWord = searchWord;
-        }
-    }
-
-    public void _on_PlayerLine_text_entered(string text) {
-        if(debug == true) {
-            debugTrie(text);
-        }
-    }
-
-    public void _on_PlayerLine_text_change_rejected() {
-
-    }
     //Changed Text Signal
     public void newSearch(string text, int caret){
-        List<string> lineWords = text.Split(" ").ToList();
-        List<List<int>> details = playerLine.detailedCounter();
-        playerLine.setText(playerLine.singleSpace(lineWords), caret, details[0][9]);
-        EmitSignal(nameof(WordSelected));
+        if(!allowSpaces){
+            List<string> lineWords = text.Split(" ").ToList();
+            List<List<int>> details = playerLine.detailedCounter();
+            playerLine.setText(playerLine.singleSpace(lineWords), caret, details[0][9]);
+        }
+        EmitSignal(nameof(WordSelected), true);
         searchTrie(searchWord);
         setHelperPos(playerLine.getStringSize(detales[0][5]), HELPER.LONETRIE);
     }
     public void newKeyboard(string text, int caret, bool oldKeyboard = false){
-        List<string> lineWords = text.Split(" ").ToList();
-        int exactCaret = 0;
-        List<List<int>> details = playerLine.detailedCounter();
-
-        if(text.Length > 0){
-            exactCaret = playerLine.setText(playerLine.singleSpace(lineWords), caret,
-                                    details[0][9]);
+        if(!allowSpaces){
+            List<string> lineWords = text.Split(" ").ToList();
+            List<List<int>> details = playerLine.detailedCounter();
+            if(text.Length > 0){
+                playerLine.setText(playerLine.singleSpace(lineWords), caret,
+                                        details[0][9]);
+            }
         }
-        EmitSignal(nameof(WordSelected));
+        EmitSignal(nameof(WordSelected), true);
         keyboard.Visible = true;
         string pText = playerLine.Text;
-        if((exactCaret > 0 && pText[exactCaret-1] == ' ')){//> 0 is a error handler            
+        int pCaret = playerLine.CaretPosition;
+        PlayerLine.POSITION curPos = playerLine.positionCheck();
+        if(curPos == PlayerLine.POSITION.OUTSIDE) {
             searchTrie(searchWord, HELPER.KEYBOARD, true);
-            setHelperPos(playerLine.getStringSize(exactCaret), HELPER.KEYBOARD, oldKeyboard);
-        } else if(exactCaret > 0 && pText[exactCaret-1] != ' '){
+            setHelperPos(playerLine.getStringSize(pCaret), HELPER.KEYBOARD, searchWord);
+        } else {//Can use oldKeyboard to change behavior further
             searchTrie(searchWord, HELPER.KEYBOARD, false);            
-            setHelperPos(playerLine.getStringSize(detales[0][5]), HELPER.KEYBOARD, oldKeyboard);
-        } else if(exactCaret == 0) {
-            searchTrie(searchWord, HELPER.KEYBOARD, true);
-            setHelperPos(playerLine.getStringSize(detales[0][5]), HELPER.KEYBOARD, oldKeyboard);
-        }
+            setHelperPos(playerLine.getStringSize(detales[0][5]), HELPER.KEYBOARD, searchWord);
+        }//oldKeyboard false can work on !POS.RIGHT & true on !POS.OUTSIDE 
+
         helperState = HELPER.KEYBOARD;
         if(!oldKeyboard) {
             Button aKey = (Button)keyboard.GetNode("KeyGrid/Aa");
@@ -299,11 +338,13 @@ public class UI : Control {
 
     public string cleanWord(string word){ //Also marks whether word is complete
         selectedIncomplete = false;
-        if(word[word.Length - 1] == '-') {
-            selectedIncomplete = true;
-            return word.Substr(0, word.Length - 1);
-        } else if(word[word.Length - 1] == '~'){
-            return word.Substr(0, word.Length - 1);
+        if(word.Length > 0){
+            if(word[word.Length - 1] == '-') {
+                selectedIncomplete = true;
+                return word.Substr(0, word.Length - 1);
+            } else if(word[word.Length - 1] == '~'){
+                return word.Substr(0, word.Length - 1);
+            }
         }
         return word;
     }//In order to avoid this mutation pattern I could just use WordTrie.find()
@@ -313,16 +354,40 @@ public class UI : Control {
     //them to search for them after searching for them from the origin word that
     //was typed.)
 
-    public void setHelperPos(Vector2 textToCaretSize, HELPER helperState, bool oldKeyboard = false) {
+    public void setHelperPos(Vector2 textToCaretSize, HELPER helperState, string selection = "") {
         if(helperState == HELPER.LONETRIE){
-            wordList.RectPosition = new Vector2(textToCaretSize.x + 1,
+            if(textToCaretSize.x + wordList.RectSize.x 
+                                        < playerLine.RectSize.x){
+                wordList.RectPosition = new Vector2(textToCaretSize.x + 1,
                                                 wordList.RectPosition.y);
+            } else {
+                wordList.RectPosition = new Vector2(playerLine.RectSize.x -
+                                                        wordList.RectSize.x,
+                                                        wordList.RectPosition.y);
+            }
         } else if(helperState == HELPER.KEYBOARD){
-            wordList.RectPosition = new Vector2(textToCaretSize.x + 1,
-                                    keyboard.RectPosition.y);
-            keyboard.RectPosition = new Vector2(textToCaretSize.x +
+            if(textToCaretSize.x < playerLine.RectSize.x/2){
+                wordList.RectPosition = new Vector2(textToCaretSize.x + 1,
+                                    wordList.RectPosition.y);
+                keyboard.RectPosition = new Vector2(textToCaretSize.x +
                                                     wordList.RectSize.x,
                                                     keyboard.RectPosition.y);
+            } else if(textToCaretSize.x + keyboard.RectSize.x +
+                                wordList.RectSize.x < playerLine.RectSize.x){
+                keyboard.RectPosition = new Vector2(textToCaretSize.x + 1,
+                                    keyboard.RectPosition.y);
+                wordList.RectPosition = new Vector2(textToCaretSize.x +
+                                                    keyboard.RectSize.x,
+                                                    wordList.RectPosition.y);
+            } else {
+                keyboard.RectPosition = new Vector2(playerLine.RectSize.x -
+                                                        (keyboard.RectSize.x +
+                                                        wordList.RectSize.x),
+                                                        keyboard.RectPosition.y);
+                wordList.RectPosition = new Vector2(playerLine.RectSize.x -
+                                                        wordList.RectSize.x,
+                                                        wordList.RectPosition.y);
+            }
         }
     }
 
@@ -400,6 +465,16 @@ public class UI : Control {
 }
 
 /*
+    if((pCaret > 0 && pText[pCaret-1] == ' ')){//> 0 is a error handler            
+        searchTrie(searchWord, HELPER.KEYBOARD, true);
+        setHelperPos(playerLine.getStringSize(pCaret), HELPER.KEYBOARD, searchWord);
+    } else if(pCaret > 0 && pText[pCaret-1] != ' '){
+        searchTrie(searchWord, HELPER.KEYBOARD, false);            
+        setHelperPos(playerLine.getStringSize(detales[0][5]), HELPER.KEYBOARD, searchWord);
+    } else if(pCaret == 0) {
+        searchTrie(searchWord, HELPER.KEYBOARD, true);
+        setHelperPos(playerLine.getStringSize(detales[0][5]), HELPER.KEYBOARD, searchWord);
+    }
 
 //Old Clean Word Comments 
 //Exclusively set by cleanWord()
