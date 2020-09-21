@@ -95,6 +95,7 @@ public List<List<int>> detailedCounter(bool selectBehindWord = true){
         int inbetweenSpaces = 0;
         int spacesToRemove = 0; //return value 9
 
+        int wordLength = 0;
         int tillWordEnd = 0; //return value 10
 
         List<int> results;
@@ -103,6 +104,7 @@ public List<List<int>> detailedCounter(bool selectBehindWord = true){
 
         string text = Text;
         int caret = CaretPosition;
+        GD.Print(text);
 
         if(text.Length > 0){
             for(var i = 0; i < text.Length; i++){
@@ -166,11 +168,12 @@ public List<List<int>> detailedCounter(bool selectBehindWord = true){
                     }
                 }
             }
-        }
+        } //GD.Print(wordInx, " ", text.Split(" ").Length);
         wordInx = wordInx == 0 ? 0 : wordInx-1;//Last occurence of a word before caretPos.
         tillWord = wordPos.Count > 0 ? (wordPos[wordInx] > 0 ? wordPos[wordInx] : 0) : 0;
-        tillWordEnd = tillWord + text.Split(" ")[wordInx].Length-1; //Needs Testing
-        inbetweenSpaces = (wordInx > 1) ? wordInx : wordInx;
+        wordLength = text.Split(" ")[wordInx].Length-1; //Needs Testing, this crashed, not sure why
+        tillWordEnd = tillWord + wordLength;
+        inbetweenSpaces = (wordInx > 1) ? wordInx : wordInx;//I wrote this wrong, needs testing, I don't remember my intent.
         spacesToRemove = b4CaretSpaces - inbetweenSpaces;
         results = new List<int>(){b4CaretSpaces, introSpaces, middleSpaces, endSpaces, wordInx, tillWord, b4CaretLetters, allLetters, b4CaretCleanSpaced ? 1 : 0, spacesToRemove, tillWordEnd};
         /*GD.Print("Details-\n", "\nb4CaretSpaces: ", b4CaretSpaces,

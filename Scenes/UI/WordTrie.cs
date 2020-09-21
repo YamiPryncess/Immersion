@@ -156,7 +156,7 @@ public class WordTrie : Node{
 public class TrieNode {
     public char val;
     public Dictionary<char, TrieNode> children;
-    public bool completeString;
+    public bool completeString; 
     public int depth = 0;
     public string word = "";
     public bool isRootNode = false;

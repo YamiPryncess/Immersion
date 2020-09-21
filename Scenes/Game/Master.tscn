@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=2]
+[gd_scene load_steps=16 format=2]
 
 [ext_resource path="res://Scenes/UI/WordTrie.cs" type="Script" id=1]
 [ext_resource path="res://Scenes/UI/UI.cs" type="Script" id=2]
@@ -8,25 +8,15 @@
 [ext_resource path="res://Scenes/Game/Master.cs" type="Script" id=6]
 [ext_resource path="res://Scenes/UI/Keyboard.cs" type="Script" id=7]
 [ext_resource path="res://Scenes/UI/PlayerLine.cs" type="Script" id=8]
+[ext_resource path="res://Scenes/AI/AgentSystem/GPlanner.cs" type="Script" id=9]
+[ext_resource path="res://Scenes/Item/Item.tscn" type="PackedScene" id=10]
+[ext_resource path="res://Scenes/AI/AgentSystem/GWorld.cs" type="Script" id=11]
+[ext_resource path="res://Scenes/AI/AI.cs" type="Script" id=12]
+[ext_resource path="res://Scenes/AI/AgentSystem/WorldStates.cs" type="Script" id=13]
 
-[sub_resource type="CylinderShape" id=1]
-radius = 0.245709
-height = 0.0451286
+[sub_resource type="Theme" id=1]
 
-[sub_resource type="SpatialMaterial" id=2]
-albedo_color = Color( 0.980392, 0.945098, 0.00392157, 1 )
-
-[sub_resource type="CylinderMesh" id=3]
-material = SubResource( 2 )
-top_radius = 0.25
-bottom_radius = 0.25
-height = 0.05
-
-[sub_resource type="Skin" id=4]
-
-[sub_resource type="Theme" id=5]
-
-[sub_resource type="StyleBoxFlat" id=6]
+[sub_resource type="StyleBoxFlat" id=2]
 bg_color = Color( 0.0588235, 0.737255, 0.482353, 0.223529 )
 
 [node name="Master" type="Spatial"]
@@ -38,10 +28,6 @@ script = ExtResource( 6 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.31293, 0.347536, 0.372441 )
 collision_layer = 1
 
-[node name="FirstPerson" parent="Flatplane/Lynn/Camera" index="0"]
-cull_mask = 1048575
-current = true
-
 [node name="Alexia" parent="Flatplane" instance=ExtResource( 3 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.04535, 0.627925, -0.438894 )
 collision_layer = 2
@@ -49,27 +35,28 @@ collision_mask = 3
 fullName = "AlexiaValentine"
 playState = 0
 
-[node name="ItemMaster" type="Node" parent="."]
+[node name="Pizza" parent="Flatplane" instance=ExtResource( 10 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.64, 0 )
 
-[node name="Food" type="Node" parent="ItemMaster"]
+[node name="AI" type="Node" parent="."]
+script = ExtResource( 12 )
 
-[node name="Pizza" type="Area" parent="ItemMaster/Food"]
-collision_layer = 3
+[node name="BTree" type="Node" parent="AI"]
 
-[node name="CollisionShape" type="CollisionShape" parent="ItemMaster/Food/Pizza"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.639572, 0 )
-shape = SubResource( 1 )
+[node name="GPlanner" type="Node" parent="AI"]
+script = ExtResource( 9 )
 
-[node name="MeshInstance" type="MeshInstance" parent="ItemMaster/Food/Pizza/CollisionShape"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.390537, 0 )
-layers = 3
-mesh = SubResource( 3 )
-skin = SubResource( 4 )
-material/0 = null
+[node name="GWorld" type="Node" parent="AI"]
+script = ExtResource( 11 )
+
+[node name="WorldStates" type="Node" parent="AI"]
+script = ExtResource( 13 )
 
 [node name="UI" type="Control" parent="."]
-anchor_right = 1.0
-anchor_bottom = 1.0
+anchor_left = -0.000301011
+anchor_top = -0.000219097
+anchor_right = 0.999699
+anchor_bottom = 0.999781
 margin_left = 0.308235
 margin_top = 0.131458
 margin_right = 0.308228
@@ -85,8 +72,8 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_top = -183.0
-theme = SubResource( 5 )
-custom_styles/panel = SubResource( 6 )
+theme = SubResource( 1 )
+custom_styles/panel = SubResource( 2 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -120,7 +107,6 @@ margin_left = -318.0
 margin_top = -25.0
 margin_right = 318.0
 hint_tooltip = "lll"
-max_length = 78
 script = ExtResource( 8 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -406,3 +392,5 @@ script = ExtResource( 1 )
 [editable path="Flatplane/Lynn"]
 
 [editable path="Flatplane/Alexia"]
+
+[editable path="Flatplane/Pizza"]

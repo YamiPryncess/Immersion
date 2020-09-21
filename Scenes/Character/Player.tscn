@@ -5,9 +5,11 @@
 [ext_resource path="res://Scenes/Character/States/Run.gd" type="Script" id=3]
 [ext_resource path="res://Scenes/Character/Models/Mannequiny.tscn" type="PackedScene" id=4]
 [ext_resource path="res://Scenes/Character/Player.gd" type="Script" id=5]
-[ext_resource path="res://Scenes/Game/StateMachine/StateMachine.gd" type="Script" id=6]
+[ext_resource path="res://Scenes/AI/StateMachine/StateMachine.gd" type="Script" id=6]
 [ext_resource path="res://Scenes/Character/States/Move.gd" type="Script" id=7]
 [ext_resource path="res://Scenes/Character/Camera/CameraRig.tscn" type="PackedScene" id=8]
+
+
 
 
 [sub_resource type="AnimationNodeStateMachinePlayback" id=1]

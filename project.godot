@@ -47,12 +47,12 @@ _global_script_classes=[ {
 "base": "Node",
 "class": "State",
 "language": "GDScript",
-"path": "res://Scenes/Game/StateMachine/State.gd"
+"path": "res://Scenes/AI/StateMachine/State.gd"
 }, {
 "base": "Node",
 "class": "StateMachine",
 "language": "GDScript",
-"path": "res://Scenes/Game/StateMachine/StateMachine.gd"
+"path": "res://Scenes/AI/StateMachine/StateMachine.gd"
 } ]
 _global_script_class_icons={
 "CameraRig": "",
@@ -79,6 +79,11 @@ Database="*res://Scenes/Item/Database.tscn"
 [display]
 
 window/stretch/aspect="keep"
+
+[gdnative]
+
+singletons=[  ]
+singletons_disabled=[  ]
 
 [input]
 

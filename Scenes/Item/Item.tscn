@@ -1,0 +1,32 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://Scenes/Item/Item.cs" type="Script" id=1]
+
+[sub_resource type="CylinderShape" id=1]
+radius = 0.245709
+height = 0.0451286
+
+[sub_resource type="SpatialMaterial" id=2]
+albedo_color = Color( 0.980392, 0.945098, 0.00392157, 1 )
+
+[sub_resource type="CylinderMesh" id=3]
+material = SubResource( 2 )
+top_radius = 0.25
+bottom_radius = 0.25
+height = 0.05
+
+[sub_resource type="Skin" id=4]
+
+[node name="Item" type="Area"]
+collision_layer = 3
+script = ExtResource( 1 )
+
+[node name="CollisionShape" type="CollisionShape" parent="."]
+shape = SubResource( 1 )
+
+[node name="MeshInstance" type="MeshInstance" parent="CollisionShape"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.390537, 0 )
+layers = 3
+mesh = SubResource( 3 )
+skin = SubResource( 4 )
+material/0 = null

@@ -53,6 +53,11 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="python" Version="3.9.0-rc2" />
+    <PackageReference Include="IronPython" Version="2.7.11-candidate1" />
+    <PackageReference Include="Stanford.NLP.CoreNLP" Version="3.9.2" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="sqlite3">
       <Private>False</Private>
       <HintPath>$(ProjectDir)/Libraries/sqlite451mono/System.Data.SQLite.dll</HintPath>
