@@ -1,99 +1,99 @@
-using Godot;
-using System.Collections.Generic;
+// using Godot;
+// using System.Collections.Generic;
 
-//make the dictionary elements their own serializable class
-//so we can edit them in the inspector
-//[System.Serializable]
+// //make the dictionary elements their own serializable class
+// //so we can edit them in the inspector
+// //[System.Serializable]
 
-public class WorldStates : Node
-{
-// Constructor
-    public Dictionary<string, int> states;
+// public class WorldStates : Node
+// {
+// // Constructor
+//     public Dictionary<string, int> states;
 
-    public WorldStates() {
+//     public WorldStates() {
 
-        states = new Dictionary<string, int>();
-    }
-
-    /************** Helper funtions ****************/
-    // Check for a key
-    public bool HasState(string key) {
-
-        return states.ContainsKey(key);
-    }
-
-    // Add to our dictionary
-    private void AddState(string key, int value) {
-
-        states.Add(key, value);
-    }
-
-    public void ModifyState(string key, int value) {
-
-        // If it contains this key
-        if (HasState(key)) {
-
-            // Add the value to the state
-            states[key] += value;
-            // If it's less than zero then remove it
-            if (states[key] <= 0) {
-
-                // Call the RemoveState method
-                RemoveState(key);
-            }
-        } else {
-
-            AddState(key, value);
-        }
-    }
-
-    // Method to remove a state
-    public void RemoveState(string key) {
-
-        // Check if it frist exists
-        if (HasState(key)) {
-
-            states.Remove(key);
-        }
-    }
-
-    // Set a state
-    public void SetState(string key, int value) {
-
-        // Check if it exists
-        if (HasState(key)) {
-
-            states[key] = value;
-        } else {
-
-            AddState(key, value);
-        }
-    }
-
-    public Dictionary<string, int> GetStates() {
-
-        return states;
-    }
-}
-
-public class WorldState {
-
-    public string key;
-    public int value;
-}
-
-//     // Declare member variables here. Examples:
-//     // private int a = 2;
-//     // private string b = "text";
-
-//     // Called when the node enters the scene tree for the first time.
-//     public override void _Ready()
-//     {
-        
+//         states = new Dictionary<string, int>();
 //     }
 
-// //  // Called every frame. 'delta' is the elapsed time since the previous frame.
-// //  public override void _Process(float delta)
-// //  {
-// //      
-// //  }
+//     /************** Helper funtions ****************/
+//     // Check for a key
+//     public bool HasState(string key) {
+
+//         return states.ContainsKey(key);
+//     }
+
+//     // Add to our dictionary
+//     private void AddState(string key, int value) {
+
+//         states.Add(key, value);
+//     }
+
+//     public void ModifyState(string key, int value) {
+
+//         // If it contains this key
+//         if (HasState(key)) {
+
+//             // Add the value to the state
+//             states[key] += value;
+//             // If it's less than zero then remove it
+//             if (states[key] <= 0) {
+
+//                 // Call the RemoveState method
+//                 RemoveState(key);
+//             }
+//         } else {
+
+//             AddState(key, value);
+//         }
+//     }
+
+//     // Method to remove a state
+//     public void RemoveState(string key) {
+
+//         // Check if it frist exists
+//         if (HasState(key)) {
+
+//             states.Remove(key);
+//         }
+//     }
+
+//     // Set a state
+//     public void SetState(string key, int value) {
+
+//         // Check if it exists
+//         if (HasState(key)) {
+
+//             states[key] = value;
+//         } else {
+
+//             AddState(key, value);
+//         }
+//     }
+
+//     public Dictionary<string, int> GetStates() {
+
+//         return states;
+//     }
+// }
+
+// public class WorldState {
+
+//     public string key;
+//     public int value;
+// }
+
+// //     // Declare member variables here. Examples:
+// //     // private int a = 2;
+// //     // private string b = "text";
+
+// //     // Called when the node enters the scene tree for the first time.
+// //     public override void _Ready()
+// //     {
+        
+// //     }
+
+// // //  // Called every frame. 'delta' is the elapsed time since the previous frame.
+// // //  public override void _Process(float delta)
+// // //  {
+// // //      
+// // //  }
