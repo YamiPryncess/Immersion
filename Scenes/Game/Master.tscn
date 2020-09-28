@@ -1,0 +1,396 @@
+[gd_scene load_steps=17 format=2]
+
+[ext_resource path="res://Scenes/UI/WordTrie.cs" type="Script" id=1]
+[ext_resource path="res://Scenes/UI/UI.cs" type="Script" id=2]
+[ext_resource path="res://Scenes/Character/Character.tscn" type="PackedScene" id=3]
+[ext_resource path="res://Scenes/UI/InventoryUI.tscn" type="PackedScene" id=4]
+[ext_resource path="res://Scenes/Level/Flatplane.tscn" type="PackedScene" id=5]
+[ext_resource path="res://Scenes/Game/Master.cs" type="Script" id=6]
+[ext_resource path="res://Scenes/UI/Keyboard.cs" type="Script" id=7]
+[ext_resource path="res://Scenes/UI/PlayerLine.cs" type="Script" id=8]
+[ext_resource path="res://Scenes/AI/AgentSystem/GPlanner.cs" type="Script" id=9]
+[ext_resource path="res://Scenes/Item/Item.tscn" type="PackedScene" id=10]
+[ext_resource path="res://Scenes/AI/AgentSystem/GWorld.cs" type="Script" id=11]
+[ext_resource path="res://Scenes/AI/AI.cs" type="Script" id=12]
+[ext_resource path="res://Scenes/AI/AgentSystem/WorldStates.cs" type="Script" id=13]
+[ext_resource path="res://Scenes/NLP/WordNet.cs" type="Script" id=14]
+
+[sub_resource type="Theme" id=1]
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 0.0588235, 0.737255, 0.482353, 0.223529 )
+
+[node name="Master" type="Spatial"]
+script = ExtResource( 6 )
+
+[node name="Flatplane" parent="." instance=ExtResource( 5 )]
+
+[node name="Lynn" parent="Flatplane" instance=ExtResource( 3 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.31293, 0.347536, 0.372441 )
+collision_layer = 1
+
+[node name="Alexia" parent="Flatplane" instance=ExtResource( 3 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.04535, 0.627925, -0.438894 )
+collision_layer = 2
+collision_mask = 3
+fullName = "AlexiaValentine"
+playState = 0
+
+[node name="Pizza" parent="Flatplane" instance=ExtResource( 10 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.64, 0 )
+
+[node name="AI" type="Node" parent="."]
+script = ExtResource( 12 )
+
+[node name="BTree" type="Node" parent="AI"]
+
+[node name="GPlanner" type="Node" parent="AI"]
+script = ExtResource( 9 )
+
+[node name="GWorld" type="Node" parent="AI"]
+script = ExtResource( 11 )
+
+[node name="WorldStates" type="Node" parent="AI"]
+script = ExtResource( 13 )
+
+[node name="NLP" type="Node" parent="AI"]
+
+[node name="WordNet" type="Node" parent="AI/NLP"]
+script = ExtResource( 14 )
+
+[node name="UI" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="NinePatchRect" type="Panel" parent="UI"]
+visible = false
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = -183.0
+theme = SubResource( 1 )
+custom_styles/panel = SubResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Feels" type="Panel" parent="UI/NinePatchRect"]
+visible = false
+anchor_bottom = 0.984
+margin_right = 191.0
+margin_bottom = -0.0720062
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="PlayerInv" parent="UI/NinePatchRect" instance=ExtResource( 4 )]
+visible = false
+anchor_left = 1.0
+anchor_top = 0.016
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -192.0
+margin_top = 0.0719998
+margin_right = 0.0
+margin_bottom = 0.0
+
+[node name="PlayerLine" type="LineEdit" parent="UI"]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+margin_left = -318.0
+margin_top = -25.0
+margin_right = 318.0
+hint_tooltip = "lll"
+script = ExtResource( 8 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="WordList" type="ItemList" parent="UI/PlayerLine"]
+anchor_right = 1.0
+margin_top = -143.0
+margin_right = -552.0
+grow_vertical = 0
+rect_scale = Vector2( 1.08, 1 )
+allow_rmb_select = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Keyboard" type="Panel" parent="UI/PlayerLine"]
+margin_left = 118.0
+margin_top = -143.0
+margin_right = 350.0
+margin_bottom = 1.0
+script = ExtResource( 7 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="KeyGrid" type="GridContainer" parent="UI/PlayerLine/Keyboard"]
+margin_right = 224.0
+margin_bottom = 144.0
+columns = 6
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="124" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_right = 36.0
+margin_bottom = 20.0
+text = "123"
+
+[node name="457" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 40.0
+margin_right = 76.0
+margin_bottom = 20.0
+text = "456"
+
+[node name="790" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 80.0
+margin_right = 117.0
+margin_bottom = 20.0
+text = "789"
+
+[node name="Zero" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 121.0
+margin_right = 151.0
+margin_bottom = 20.0
+text = "0!?"
+
+[node name="Equals" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 155.0
+margin_right = 186.0
+margin_bottom = 20.0
+text = ".,'"
+
+[node name="Backspace" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 190.0
+margin_right = 226.0
+margin_bottom = 20.0
+text = "<_"
+
+[node name="Aa" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_top = 24.0
+margin_right = 36.0
+margin_bottom = 44.0
+text = "Aa"
+
+[node name="Bb" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 40.0
+margin_top = 24.0
+margin_right = 76.0
+margin_bottom = 44.0
+text = "Bb"
+
+[node name="Cc" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 80.0
+margin_top = 24.0
+margin_right = 117.0
+margin_bottom = 44.0
+text = "Cc"
+
+[node name="Dd" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 121.0
+margin_top = 24.0
+margin_right = 151.0
+margin_bottom = 44.0
+text = "Dd"
+
+[node name="Ee" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 155.0
+margin_top = 24.0
+margin_right = 186.0
+margin_bottom = 44.0
+text = "Ee"
+
+[node name="Space" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 190.0
+margin_top = 24.0
+margin_right = 226.0
+margin_bottom = 44.0
+text = "_>"
+
+[node name="Ff" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_top = 48.0
+margin_right = 36.0
+margin_bottom = 68.0
+text = "Ff"
+
+[node name="Gg" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 40.0
+margin_top = 48.0
+margin_right = 76.0
+margin_bottom = 68.0
+text = "Gg"
+
+[node name="Hh" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 80.0
+margin_top = 48.0
+margin_right = 117.0
+margin_bottom = 68.0
+text = "Hh"
+
+[node name="Ii" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 121.0
+margin_top = 48.0
+margin_right = 151.0
+margin_bottom = 68.0
+text = "Ii"
+
+[node name="Jj" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 155.0
+margin_top = 48.0
+margin_right = 186.0
+margin_bottom = 68.0
+text = "Jj"
+
+[node name="Quotes" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 190.0
+margin_top = 48.0
+margin_right = 226.0
+margin_bottom = 68.0
+text = "def"
+
+[node name="Kk" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_top = 72.0
+margin_right = 36.0
+margin_bottom = 92.0
+text = "Kk"
+
+[node name="Ll" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 40.0
+margin_top = 72.0
+margin_right = 76.0
+margin_bottom = 92.0
+text = "Ll"
+
+[node name="Mm" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 80.0
+margin_top = 72.0
+margin_right = 117.0
+margin_bottom = 92.0
+text = "Mm"
+
+[node name="Nn" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 121.0
+margin_top = 72.0
+margin_right = 151.0
+margin_bottom = 92.0
+text = "Nn"
+
+[node name="Oo" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 155.0
+margin_top = 72.0
+margin_right = 186.0
+margin_bottom = 92.0
+text = "Oo"
+
+[node name="Sentiment" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 190.0
+margin_top = 72.0
+margin_right = 226.0
+margin_bottom = 92.0
+text = "sen"
+
+[node name="Pp" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_top = 96.0
+margin_right = 36.0
+margin_bottom = 116.0
+text = "Pp"
+
+[node name="Qq" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 40.0
+margin_top = 96.0
+margin_right = 76.0
+margin_bottom = 116.0
+text = "Qq"
+
+[node name="Rr" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 80.0
+margin_top = 96.0
+margin_right = 117.0
+margin_bottom = 116.0
+text = "Rr"
+
+[node name="Ss" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 121.0
+margin_top = 96.0
+margin_right = 151.0
+margin_bottom = 116.0
+text = "Ss"
+
+[node name="Tt" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 155.0
+margin_top = 96.0
+margin_right = 186.0
+margin_bottom = 116.0
+text = "Tt"
+
+[node name="Similar" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 190.0
+margin_top = 96.0
+margin_right = 226.0
+margin_bottom = 116.0
+text = "sim"
+
+[node name="Uu" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_top = 120.0
+margin_right = 36.0
+margin_bottom = 140.0
+text = "Uu"
+
+[node name="Vv" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 40.0
+margin_top = 120.0
+margin_right = 76.0
+margin_bottom = 140.0
+text = "Vv"
+
+[node name="Ww" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 80.0
+margin_top = 120.0
+margin_right = 117.0
+margin_bottom = 140.0
+text = "Ww"
+
+[node name="Xx" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 121.0
+margin_top = 120.0
+margin_right = 151.0
+margin_bottom = 140.0
+text = "Xx"
+
+[node name="Yy" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 155.0
+margin_top = 120.0
+margin_right = 186.0
+margin_bottom = 140.0
+text = "Yy"
+
+[node name="Zz" type="Button" parent="UI/PlayerLine/Keyboard/KeyGrid"]
+margin_left = 190.0
+margin_top = 120.0
+margin_right = 226.0
+margin_bottom = 140.0
+text = "Zz"
+
+[node name="WordTrie" type="Node" parent="UI"]
+script = ExtResource( 1 )
+[connection signal="WordSelected" from="UI" to="UI" method="_on_UI_WordSelected"]
+[connection signal="text_change_rejected" from="UI/PlayerLine" to="UI" method="_on_PlayerLine_text_change_rejected"]
+[connection signal="text_changed" from="UI/PlayerLine" to="UI" method="_on_PlayerLine_text_changed"]
+[connection signal="text_entered" from="UI/PlayerLine" to="UI" method="_on_PlayerLine_text_entered"]
+[connection signal="pressed" from="UI/PlayerLine/Keyboard/KeyGrid/Aa" to="UI" method="_on_Key_pressed"]
+
+[editable path="Flatplane/Lynn"]
+
+[editable path="Flatplane/Alexia"]
+
+[editable path="Flatplane/Pizza"]
