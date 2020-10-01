@@ -1,11 +1,6 @@
 [gd_resource type="Resource" load_steps=2 format=2]
 
-[ext_resource path="res://Scenes/Item/Schema.gd" type="Script" id=1]
+[sub_resource type="CSharpScript" id=1]
 
 [resource]
-script = ExtResource( 1 )
-name = ""
-stackable = false
-max_stack_size = 1
-location = Vector3( 0, 0, 0 )
-type = 1
+script = SubResource( 1 )

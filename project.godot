@@ -19,30 +19,10 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Scenes/Character/Camera/CameraState.gd"
 }, {
-"base": "Resource",
-"class": "Inventory",
-"language": "GDScript",
-"path": "res://Scenes/Character/Features/Inventory.gd"
-}, {
-"base": "Resource",
-"class": "ItemResource",
-"language": "GDScript",
-"path": "res://Scenes/Item/Schema.gd"
-}, {
 "base": "Spatial",
 "class": "Mannequiny",
 "language": "GDScript",
 "path": "res://Scenes/Character/Models/Mannequiny.gd"
-}, {
-"base": "KinematicBody",
-"class": "Player",
-"language": "GDScript",
-"path": "res://Scenes/Character/Player.gd"
-}, {
-"base": "State",
-"class": "PlayerState",
-"language": "GDScript",
-"path": "res://Scenes/Character/PlayerState.gd"
 }, {
 "base": "Node",
 "class": "State",
@@ -57,11 +37,7 @@ _global_script_classes=[ {
 _global_script_class_icons={
 "CameraRig": "",
 "CameraState": "",
-"Inventory": "",
-"ItemResource": "",
 "Mannequiny": "",
-"Player": "",
-"PlayerState": "",
 "State": "",
 "StateMachine": ""
 }
@@ -71,10 +47,6 @@ _global_script_class_icons={
 config/name="Immersion"
 run/main_scene="res://Scenes/Game/Master.tscn"
 config/icon="res://icon.png"
-
-[autoload]
-
-Database="*res://Scenes/Item/Database.tscn"
 
 [display]
 

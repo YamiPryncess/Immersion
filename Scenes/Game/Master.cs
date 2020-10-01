@@ -6,8 +6,7 @@ public class Master : Node {
     // Called when the node enters the scene tree for the first time.
     // Our world states
     public Character player;
-    public override void _Ready() {
-        player = GetNode<Character>("Flatplane/Lynn");
+    public override void _Ready() {//I'm going to use this function as an auto load for now.
         Input.SetMouseMode(Input.MouseMode.Confined);
 	    //Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
     }

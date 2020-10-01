@@ -15,13 +15,13 @@ public class GInventory : Node
     }
 
     // Method to search for a particular item
-    public Area FindItemWithTag(string tag) {
+    public Area FindItemWithTag(string type) {
 
         // Iterate through all the items
         foreach (Item i in items) {
 
             // Found a match
-            if (i.tag == tag) {
+            if (i.info.type == type) {
 
                 return i;
             }

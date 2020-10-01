@@ -1,10 +1,10 @@
-[gd_scene load_steps=17 format=2]
+[gd_scene load_steps=28 format=2]
 
 [ext_resource path="res://Scenes/UI/WordTrie.cs" type="Script" id=1]
 [ext_resource path="res://Scenes/UI/UI.cs" type="Script" id=2]
 [ext_resource path="res://Scenes/Character/Character.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Scenes/UI/InventoryUI.tscn" type="PackedScene" id=4]
-[ext_resource path="res://Scenes/Level/Flatplane.tscn" type="PackedScene" id=5]
+[ext_resource path="res://Scenes/Level/Checkpoints.cs" type="Script" id=5]
 [ext_resource path="res://Scenes/Game/Master.cs" type="Script" id=6]
 [ext_resource path="res://Scenes/UI/Keyboard.cs" type="Script" id=7]
 [ext_resource path="res://Scenes/UI/PlayerLine.cs" type="Script" id=8]
@@ -14,30 +14,137 @@
 [ext_resource path="res://Scenes/AI/AI.cs" type="Script" id=12]
 [ext_resource path="res://Scenes/AI/AgentSystem/WorldStates.cs" type="Script" id=13]
 [ext_resource path="res://Scenes/NLP/WordNet.cs" type="Script" id=14]
+[ext_resource path="res://Scenes/Item/Treasury.cs" type="Script" id=15]
 
-[sub_resource type="Theme" id=1]
+[sub_resource type="NavigationMesh" id=1]
+vertices = PoolVector3Array( -18.4, 0.4, -24.4, -24.4, 0.4, -24.4, -24.4, 0.4, -12.4, -12.1, 0.4, -24.4, -18.4, 0.4, -24.4, -24.4, 0.4, -12.4, -24.4, 0.4, -6.4, -24.4, 0.4, -0.0999985, -1, 0.4, -0.0999985, -0.699999, 0.4, -1, -6.1, 0.4, -24.4, -12.1, 0.4, -24.4, -24.4, 0.4, -6.4, -0.699999, 0.4, -1, 0.200001, 0.4, -1, 0.200001, 0.4, -24.4, -6.1, 0.4, -24.4, 24.5, 0.4, -12.4, 24.5, 0.4, -24.4, 18.2, 0.4, -24.4, 24.5, 0.4, -12.4, 18.2, 0.4, -24.4, 12.2, 0.4, -24.4, 24.5, 0.4, -6.4, 0.800001, 0.4, -1, 1.1, 0.4, -0.0999985, 24.5, 0.4, -0.0999985, 24.5, 0.4, -6.4, 12.2, 0.4, -24.4, 0.200001, 0.4, -24.4, 0.200001, 0.4, -24.4, 0.200001, 0.4, -1, 0.800001, 0.4, -1, -24.4, 0.4, 18.2, -24.4, 0.4, 24.5, -18.4, 0.4, 24.5, -24.4, 0.4, 12.2, -24.4, 0.4, 18.2, -18.4, 0.4, 24.5, -12.1, 0.4, 24.5, 0.200001, 0.4, 24.5, 0.200001, 0.4, 1.1, -1, 0.4, 0.800001, -24.4, 0.4, 5.9, -24.4, 0.4, 12.2, -6.1, 0.4, 24.5, -24.4, 0.4, 12.2, -12.1, 0.4, 24.5, -6.1, 0.4, 24.5, -1, 0.4, 0.800001, -1, 0.4, -0.0999985, -24.4, 0.4, -0.0999985, -24.4, 0.4, 5.9, 18.2, 0.4, 24.5, 24.5, 0.4, 24.5, 24.5, 0.4, 18.2, 12.2, 0.4, 24.5, 18.2, 0.4, 24.5, 24.5, 0.4, 18.2, 24.5, 0.4, 12.2, 1.1, 0.4, 0.800001, 0.200001, 0.4, 1.1, 0.200001, 0.4, 24.5, 12.2, 0.4, 24.5, 24.5, 0.4, 5.9, 24.5, 0.4, -0.0999985, 12.2, 0.4, 24.5, 24.5, 0.4, 12.2, 24.5, 0.4, 5.9, 24.5, 0.4, -0.0999985, 1.1, 0.4, -0.0999985, 1.1, 0.4, 0.800001 )
+polygons = [ PoolIntArray( 2, 1, 0 ), PoolIntArray( 4, 3, 5 ), PoolIntArray( 5, 3, 6 ), PoolIntArray( 8, 7, 9 ), PoolIntArray( 9, 7, 12 ), PoolIntArray( 9, 12, 11 ), PoolIntArray( 9, 11, 10 ), PoolIntArray( 14, 13, 15 ), PoolIntArray( 15, 13, 16 ), PoolIntArray( 19, 18, 17 ), PoolIntArray( 21, 20, 22 ), PoolIntArray( 22, 20, 23 ), PoolIntArray( 25, 24, 26 ), PoolIntArray( 26, 24, 27 ), PoolIntArray( 27, 24, 28 ), PoolIntArray( 28, 24, 29 ), PoolIntArray( 32, 31, 30 ), PoolIntArray( 35, 34, 33 ), PoolIntArray( 37, 36, 38 ), PoolIntArray( 38, 36, 39 ), PoolIntArray( 41, 40, 42 ), PoolIntArray( 42, 40, 45 ), PoolIntArray( 42, 45, 44 ), PoolIntArray( 42, 44, 43 ), PoolIntArray( 48, 47, 46 ), PoolIntArray( 50, 49, 51 ), PoolIntArray( 51, 49, 52 ), PoolIntArray( 55, 54, 53 ), PoolIntArray( 57, 56, 58 ), PoolIntArray( 58, 56, 59 ), PoolIntArray( 61, 60, 62 ), PoolIntArray( 62, 60, 63 ), PoolIntArray( 63, 60, 64 ), PoolIntArray( 64, 60, 65 ), PoolIntArray( 68, 67, 66 ), PoolIntArray( 71, 70, 69 ) ]
 
-[sub_resource type="StyleBoxFlat" id=2]
+[sub_resource type="SpatialMaterial" id=2]
+albedo_color = Color( 0.192157, 0.854902, 1, 1 )
+
+[sub_resource type="CubeMesh" id=3]
+material = SubResource( 2 )
+size = Vector3( 50, 5, 50 )
+
+[sub_resource type="Skin" id=4]
+
+[sub_resource type="ConvexPolygonShape" id=5]
+points = PoolVector3Array( 25, 2.5, 25, 25, 2.5, -25, -25, 2.5, -25, -25, 2.5, 25, -25, -2.5, 25, 25, -2.5, 25, 25, -2.5, -25, -25, -2.5, -25 )
+
+[sub_resource type="SpatialMaterial" id=6]
+albedo_color = Color( 0.556863, 0.121569, 0.752941, 1 )
+
+[sub_resource type="CubeMesh" id=7]
+material = SubResource( 6 )
+size = Vector3( 0.5, 1, 0.5 )
+
+[sub_resource type="Skin" id=8]
+
+[sub_resource type="ConcavePolygonShape" id=9]
+data = PoolVector3Array( -0.25, 0.5, 0.25, 0.25, 0.5, 0.25, -0.25, -0.5, 0.25, 0.25, 0.5, 0.25, 0.25, -0.5, 0.25, -0.25, -0.5, 0.25, 0.25, 0.5, -0.25, -0.25, 0.5, -0.25, 0.25, -0.5, -0.25, -0.25, 0.5, -0.25, -0.25, -0.5, -0.25, 0.25, -0.5, -0.25, 0.25, 0.5, 0.25, 0.25, 0.5, -0.25, 0.25, -0.5, 0.25, 0.25, 0.5, -0.25, 0.25, -0.5, -0.25, 0.25, -0.5, 0.25, -0.25, 0.5, -0.25, -0.25, 0.5, 0.25, -0.25, -0.5, -0.25, -0.25, 0.5, 0.25, -0.25, -0.5, 0.25, -0.25, -0.5, -0.25, 0.25, 0.5, 0.25, -0.25, 0.5, 0.25, 0.25, 0.5, -0.25, -0.25, 0.5, 0.25, -0.25, 0.5, -0.25, 0.25, 0.5, -0.25, -0.25, -0.5, 0.25, 0.25, -0.5, 0.25, -0.25, -0.5, -0.25, 0.25, -0.5, 0.25, 0.25, -0.5, -0.25, -0.25, -0.5, -0.25 )
+
+[sub_resource type="BoxShape" id=10]
+
+[sub_resource type="Theme" id=11]
+
+[sub_resource type="StyleBoxFlat" id=12]
 bg_color = Color( 0.0588235, 0.737255, 0.482353, 0.223529 )
 
 [node name="Master" type="Spatial"]
 script = ExtResource( 6 )
 
-[node name="Flatplane" parent="." instance=ExtResource( 5 )]
+[node name="NavWorld" type="Navigation" parent="."]
 
-[node name="Lynn" parent="Flatplane" instance=ExtResource( 3 )]
+[node name="Treasury" type="Node" parent="NavWorld"]
+script = ExtResource( 15 )
+
+[node name="Pizza" parent="NavWorld/Treasury" instance=ExtResource( 10 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.64, 0 )
+
+[node name="FlatPlanes" type="NavigationMeshInstance" parent="NavWorld"]
+navmesh = SubResource( 1 )
+
+[node name="MeshInstance" type="MeshInstance" parent="NavWorld/FlatPlanes"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.5, 0 )
+layers = 3
+mesh = SubResource( 3 )
+skin = SubResource( 4 )
+material/0 = null
+
+[node name="StaticBody" type="StaticBody" parent="NavWorld/FlatPlanes/MeshInstance"]
+
+[node name="CollisionShape" type="CollisionShape" parent="NavWorld/FlatPlanes/MeshInstance/StaticBody"]
+shape = SubResource( 5 )
+
+[node name="Stand" type="MeshInstance" parent="NavWorld/FlatPlanes"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0 )
+layers = 3
+mesh = SubResource( 7 )
+skin = SubResource( 8 )
+material/0 = null
+
+[node name="StaticBody" type="StaticBody" parent="NavWorld/FlatPlanes/Stand"]
+
+[node name="CollisionShape" type="CollisionShape" parent="NavWorld/FlatPlanes/Stand/StaticBody"]
+shape = SubResource( 9 )
+
+[node name="Checkpoints" type="Spatial" parent="NavWorld/FlatPlanes"]
+script = ExtResource( 5 )
+
+[node name="Pos1" type="Position3D" parent="NavWorld/FlatPlanes/Checkpoints"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -20.607, 0, -21.279 )
+
+[node name="Area" type="Area" parent="NavWorld/FlatPlanes/Checkpoints/Pos1"]
+
+[node name="CollisionShape" type="CollisionShape" parent="NavWorld/FlatPlanes/Checkpoints/Pos1/Area"]
+shape = SubResource( 10 )
+
+[node name="Pos2" type="Position3D" parent="NavWorld/FlatPlanes/Checkpoints"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -20.607, 0, 21.44 )
+
+[node name="Area" type="Area" parent="NavWorld/FlatPlanes/Checkpoints/Pos2"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -42.719 )
+
+[node name="CollisionShape" type="CollisionShape" parent="NavWorld/FlatPlanes/Checkpoints/Pos2/Area"]
+shape = SubResource( 10 )
+
+[node name="Pos3" type="Position3D" parent="NavWorld/FlatPlanes/Checkpoints"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 20.286, 0, -21.279 )
+
+[node name="Area" type="Area" parent="NavWorld/FlatPlanes/Checkpoints/Pos3"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -40.893, 0, 0 )
+
+[node name="CollisionShape" type="CollisionShape" parent="NavWorld/FlatPlanes/Checkpoints/Pos3/Area"]
+shape = SubResource( 10 )
+
+[node name="Pos4" type="Position3D" parent="NavWorld/FlatPlanes/Checkpoints"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 21.745, 0, 21.44 )
+
+[node name="Area" type="Area" parent="NavWorld/FlatPlanes/Checkpoints/Pos4"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -42.352, 0, -42.719 )
+
+[node name="CollisionShape" type="CollisionShape" parent="NavWorld/FlatPlanes/Checkpoints/Pos4/Area"]
+shape = SubResource( 10 )
+
+[node name="Pos5" type="Position3D" parent="NavWorld/FlatPlanes/Checkpoints"]
+
+[node name="Area" type="Area" parent="NavWorld/FlatPlanes/Checkpoints/Pos5"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -20.607, 0, -21.279 )
+
+[node name="CollisionShape" type="CollisionShape" parent="NavWorld/FlatPlanes/Checkpoints/Pos5/Area"]
+shape = SubResource( 10 )
+
+[node name="Lynn" parent="NavWorld" instance=ExtResource( 3 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.31293, 0.347536, 0.372441 )
 collision_layer = 1
 
-[node name="Alexia" parent="Flatplane" instance=ExtResource( 3 )]
+[node name="Alexia" parent="NavWorld" instance=ExtResource( 3 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.04535, 0.627925, -0.438894 )
 collision_layer = 2
 collision_mask = 3
 fullName = "AlexiaValentine"
 playState = 0
-
-[node name="Pizza" parent="Flatplane" instance=ExtResource( 10 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.64, 0 )
 
 [node name="AI" type="Node" parent="."]
 script = ExtResource( 12 )
@@ -67,13 +174,12 @@ __meta__ = {
 }
 
 [node name="NinePatchRect" type="Panel" parent="UI"]
-visible = false
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_top = -183.0
-theme = SubResource( 1 )
-custom_styles/panel = SubResource( 2 )
+theme = SubResource( 11 )
+custom_styles/panel = SubResource( 12 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -88,7 +194,6 @@ __meta__ = {
 }
 
 [node name="PlayerInv" parent="UI/NinePatchRect" instance=ExtResource( 4 )]
-visible = false
 anchor_left = 1.0
 anchor_top = 0.016
 anchor_right = 1.0
@@ -388,9 +493,3 @@ script = ExtResource( 1 )
 [connection signal="text_changed" from="UI/PlayerLine" to="UI" method="_on_PlayerLine_text_changed"]
 [connection signal="text_entered" from="UI/PlayerLine" to="UI" method="_on_PlayerLine_text_entered"]
 [connection signal="pressed" from="UI/PlayerLine/Keyboard/KeyGrid/Aa" to="UI" method="_on_Key_pressed"]
-
-[editable path="Flatplane/Lynn"]
-
-[editable path="Flatplane/Alexia"]
-
-[editable path="Flatplane/Pizza"]

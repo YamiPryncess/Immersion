@@ -4,12 +4,13 @@ using System.Linq;
 
 public class Character : KinematicBody {
     //=============LOCAL VARIABLES================
+    [Signal]
+    public delegate void InventoryChanged();
     public int frame = 0;
     public Master master;
     public Spatial mannequiny;
-    public Object inventory;
-    [Export] private string fullName = "LynnCelestine";
-    private string savePath;
+    public Dictionary<string, ItemCore> inventory = new Dictionary<string, ItemCore>();
+    [Export] public string fullName = "LynnCelestine";
     public AnimationTree animationTree;
     public AnimationNodeStateMachinePlayback stateMachine;
     public CharCam camera;
@@ -40,7 +41,6 @@ public class Character : KinematicBody {
         GAgent = GetNode<GAgent>("GAgent");
         mannequiny = (Spatial)GetNode("Mannequiny");animationTree = (AnimationTree)GetNode("Mannequiny/AnimationTree");
         stateMachine = (AnimationNodeStateMachinePlayback)animationTree.Get("parameters/playback");
-        initInventory();
         if(playState == PLAYSTATE.PHYSICS && master.player == null) {
             master.player = this;
         }
@@ -63,31 +63,6 @@ public class Character : KinematicBody {
             movement.inputPhysics(delta);
         } else {
             MoveAndSlide(new Vector3(0, -gravity*delta, 0));
-        }
-    }
-    //=============SIGNALS================
-    public void _on_Inventory_changed(Object inventory){
-        ResourceSaver.Save(savePath, (Resource)inventory);
-    }
-
-    //=============INITIALIZATION FUNCTIONS================
-    public void initInventory() {
-        savePath = "user://" + fullName + "Inventory.tres";
-        GDScript invResource = (GDScript) GD.Load("res://Scenes/Character/Features/Inventory.gd");
-        inventory = (Godot.Object) invResource.New(); // This is a Godot.Object
-
-        if(inventory == null) GD.Print("No Inventory for NPC");
-        
-        inventory.Connect("inventory_changed", this, nameof(_on_Inventory_changed));
-        
-        bool invExists = ResourceLoader.Exists(savePath);
-
-        if (invExists){
-            Resource existingInv = (Resource) GD.Load(savePath);
-            inventory.Call("set_items", existingInv.Call("get_items"));
-            GD.Print(inventory, existingInv, "Existing Inventory loaded");
-        } else {
-            GD.Print(inventory, "New Inventory created");
         }
     }
 }
