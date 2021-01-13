@@ -20,6 +20,8 @@ public class GAgent : Node {
     public GAction currentAction;
     // Our subgoal
     SubGoal currentGoal;
+    List<Queue<GAction>> past = new List<Queue<GAction>>();
+    List<Queue<GAction>> current = new List<Queue<GAction>>();
     
     public Timer timer;
     bool invoked = false;
@@ -67,29 +69,7 @@ public class GAgent : Node {
             }
             return;
         }
-
-        // Check we have a planner and an actionQueue
-        if (planner == null || actionQueue == null) {
-
-            // If planner is null then create a new one
-            //planner = new GPlanner();
-
-            // Sort the goals in descending order and store them in sortedGoals
-            var sortedGoals = from entry in goals orderby entry.Value descending select entry;
-
-            //look through each goal to find one that has an achievable plan
-            foreach (KeyValuePair<SubGoal, int> sg in sortedGoals) {
-
-                actionQueue = planner.plan(actions, sg.Key.sGoals, beliefs);
-                // If actionQueue is not = null then we must have a plan
-                if (actionQueue != null) {
-
-                    // Set the current goal
-                    currentGoal = sg.Key;
-                    break;
-                }
-            }
-        }
+        selectAndPlanGoal();
 
         // Have we an actionQueue
         if (actionQueue != null && actionQueue.Count == 0) {
@@ -129,6 +109,29 @@ public class GAgent : Node {
 
                 // Force a new plan
                 actionQueue = null;
+            }
+        }
+    }
+    public void selectAndPlanGoal(){// Check we have a planner and an actionQueue
+        if (planner == null || actionQueue == null) {
+
+            // If planner is null then create a new one
+            //planner = new GPlanner();
+
+            // Sort the goals in descending order and store them in sortedGoals
+            var sortedGoals = from entry in goals orderby entry.Value descending select entry;
+
+            //look through each goal to find one that has an achievable plan
+            foreach (KeyValuePair<SubGoal, int> sg in sortedGoals) {
+
+                actionQueue = planner.plan(actions, sg.Key.sGoals, beliefs);
+                // If actionQueue is not = null then we must have a plan
+                if (actionQueue != null) {
+
+                    // Set the current goal
+                    currentGoal = sg.Key;
+                    break;
+                }
             }
         }
     }

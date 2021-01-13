@@ -8,6 +8,11 @@ public class Interaction : Node {
     public Character character;
     public Treasury treasury;
     private string savePath;
+    private int substring;
+    public Area lightSpace;
+    SphereShape lightShape;
+    //public List<Character> interpersonal = new List<Character>();
+
     public override void _Ready() {
         character = GetParent<Character>();
         treasury = GetTree().Root.GetNode<Treasury>("Master/NavWorld/Treasury");
@@ -20,12 +25,17 @@ public class Interaction : Node {
             GD.Print("Inventory File Open Status: ", Err);
             string itemJson = file.GetAsText();
             file.Close();
-            character.inventory = JsonConvert.DeserializeObject<Dictionary<string,ItemCore>>(itemJson);
+            character.inventory = JsonConvert.DeserializeObject<Dictionary<int,ItemCore>>(itemJson);
         } else {
-            character.inventory.Add("Currency", treasury.getItem("Currency"));
+            ItemCore item = treasury.createItem("Currency");
+            character.inventory.Add(item.id, item);
             character.EmitSignal(nameof(Character.InventoryChanged));
         }
-        GD.Print(character.inventory["Currency"].synset);
+        string printMe = "";
+        foreach(KeyValuePair<int, ItemCore> item in character.inventory){
+            printMe += item.Value.id + " ";
+        }
+        GD.Print("Inventory ids: ", printMe);
     }
     public void _on_Inventory_Changed(){
         string invJson = JsonConvert.SerializeObject(character.inventory, Formatting.Indented);
@@ -35,9 +45,21 @@ public class Interaction : Node {
         file.StoreString(invJson);
         file.Close();
     }
+    /*public void informCharacters(string content){ //Could be a signal
+        for(var i = 0; i < interpersonal.Count; i++) { 
+            //interpersonal[i]
+        }
+    }*/
 }
 
 //Removed Code
+//     if(!character.inventory.ContainsKey(col.Value.info.type)){
+            //         character.inventory.Add(col.Value.info.type, col.Value.info);
+                    
+            //     } else {
+
+            //     }
+            //    break;
 // List<ItemCore> itemCores = new List<ItemCore>();
 // foreach(KeyValuePair<string, Item> core in inventory){
 //     itemCores.Add(core.Value.info);

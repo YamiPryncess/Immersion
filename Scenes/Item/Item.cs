@@ -1,10 +1,10 @@
 using Godot;
 using System;
 
-public class Item : Area {
+public class Item : RigidBody {
     Treasury treasury;
     public ItemCore info;
-    [Export] public string tempType = "Pizza";
+    [Export] public string tempType = "Pizza"; //State the desired item in editor then get it in _Process;
     public Item() {}
     public Item(ItemCore coreInfo) {
         info = coreInfo;
@@ -16,12 +16,6 @@ public class Item : Area {
         //For now this code works with items set up in the editor
     }
 
-    public override void _Process(float delta) {
-        if(info != null) {
-            info = treasury.getItem(tempType);
-            SetProcess(false);
-        } else {
-            SetProcess(false);
-        }
-    }
+    // public override void _Process(float delta) {
+    // }
 }

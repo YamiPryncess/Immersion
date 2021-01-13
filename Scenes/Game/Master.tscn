@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=2]
+[gd_scene load_steps=31 format=2]
 
 [ext_resource path="res://Scenes/UI/WordTrie.cs" type="Script" id=1]
 [ext_resource path="res://Scenes/UI/UI.cs" type="Script" id=2]
@@ -15,6 +15,7 @@
 [ext_resource path="res://Scenes/AI/AgentSystem/WorldStates.cs" type="Script" id=13]
 [ext_resource path="res://Scenes/NLP/WordNet.cs" type="Script" id=14]
 [ext_resource path="res://Scenes/Item/Treasury.cs" type="Script" id=15]
+[ext_resource path="res://Scenes/Item/LightArea.cs" type="Script" id=16]
 
 [sub_resource type="NavigationMesh" id=1]
 vertices = PoolVector3Array( -18.4, 0.4, -24.4, -24.4, 0.4, -24.4, -24.4, 0.4, -12.4, -12.1, 0.4, -24.4, -18.4, 0.4, -24.4, -24.4, 0.4, -12.4, -24.4, 0.4, -6.4, -24.4, 0.4, -0.0999985, -1, 0.4, -0.0999985, -0.699999, 0.4, -1, -6.1, 0.4, -24.4, -12.1, 0.4, -24.4, -24.4, 0.4, -6.4, -0.699999, 0.4, -1, 0.200001, 0.4, -1, 0.200001, 0.4, -24.4, -6.1, 0.4, -24.4, 24.5, 0.4, -12.4, 24.5, 0.4, -24.4, 18.2, 0.4, -24.4, 24.5, 0.4, -12.4, 18.2, 0.4, -24.4, 12.2, 0.4, -24.4, 24.5, 0.4, -6.4, 0.800001, 0.4, -1, 1.1, 0.4, -0.0999985, 24.5, 0.4, -0.0999985, 24.5, 0.4, -6.4, 12.2, 0.4, -24.4, 0.200001, 0.4, -24.4, 0.200001, 0.4, -24.4, 0.200001, 0.4, -1, 0.800001, 0.4, -1, -24.4, 0.4, 18.2, -24.4, 0.4, 24.5, -18.4, 0.4, 24.5, -24.4, 0.4, 12.2, -24.4, 0.4, 18.2, -18.4, 0.4, 24.5, -12.1, 0.4, 24.5, 0.200001, 0.4, 24.5, 0.200001, 0.4, 1.1, -1, 0.4, 0.800001, -24.4, 0.4, 5.9, -24.4, 0.4, 12.2, -6.1, 0.4, 24.5, -24.4, 0.4, 12.2, -12.1, 0.4, 24.5, -6.1, 0.4, 24.5, -1, 0.4, 0.800001, -1, 0.4, -0.0999985, -24.4, 0.4, -0.0999985, -24.4, 0.4, 5.9, 18.2, 0.4, 24.5, 24.5, 0.4, 24.5, 24.5, 0.4, 18.2, 12.2, 0.4, 24.5, 18.2, 0.4, 24.5, 24.5, 0.4, 18.2, 24.5, 0.4, 12.2, 1.1, 0.4, 0.800001, 0.200001, 0.4, 1.1, 0.200001, 0.4, 24.5, 12.2, 0.4, 24.5, 24.5, 0.4, 5.9, 24.5, 0.4, -0.0999985, 12.2, 0.4, 24.5, 24.5, 0.4, 12.2, 24.5, 0.4, 5.9, 24.5, 0.4, -0.0999985, 1.1, 0.4, -0.0999985, 1.1, 0.4, 0.800001 )
@@ -46,9 +47,14 @@ data = PoolVector3Array( -0.25, 0.5, 0.25, 0.25, 0.5, 0.25, -0.25, -0.5, 0.25, 0
 
 [sub_resource type="BoxShape" id=10]
 
-[sub_resource type="Theme" id=11]
+[sub_resource type="Environment" id=11]
 
-[sub_resource type="StyleBoxFlat" id=12]
+[sub_resource type="SphereShape" id=12]
+radius = 5.0
+
+[sub_resource type="Theme" id=13]
+
+[sub_resource type="StyleBoxFlat" id=14]
 bg_color = Color( 0.0588235, 0.737255, 0.482353, 0.223529 )
 
 [node name="Master" type="Spatial"]
@@ -146,6 +152,22 @@ collision_mask = 3
 fullName = "AlexiaValentine"
 playState = 0
 
+[node name="WorldLight" type="WorldEnvironment" parent="."]
+environment = SubResource( 11 )
+
+[node name="OmniLight" type="OmniLight" parent="WorldLight"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.80862, 4.63734, 0.582563 )
+light_specular = 0.0
+
+[node name="LightArea" type="Area" parent="WorldLight/OmniLight"]
+script = ExtResource( 16 )
+
+[node name="CollisionShape" type="CollisionShape" parent="WorldLight/OmniLight/LightArea"]
+shape = SubResource( 12 )
+
+[node name="DirectionalLight" type="DirectionalLight" parent="WorldLight"]
+transform = Transform( 0.707107, 0.408248, -0.57735, 0, 0.816497, 0.57735, 0.707107, -0.408248, 0.57735, -1.38166, 3.58666, 3.22866 )
+
 [node name="AI" type="Node" parent="."]
 script = ExtResource( 12 )
 
@@ -178,8 +200,8 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_top = -183.0
-theme = SubResource( 11 )
-custom_styles/panel = SubResource( 12 )
+theme = SubResource( 13 )
+custom_styles/panel = SubResource( 14 )
 __meta__ = {
 "_edit_use_anchors_": false
 }

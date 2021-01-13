@@ -7,18 +7,35 @@ using System.Linq;
 public class GWorld : Node {
     // Our world states
     public WorldStates world;
-    Dictionary<string, Dictionary<string, int>> entities = new Dictionary<string, Dictionary<string, int>>();//All people and groups in the game. Ideas of types of people count to: Friends, Enemies, Etc.
-    Dictionary<string, Dictionary<string, int>> actions = new Dictionary<string, Dictionary<string, int>>();//Manner in which the entity-concept relationship is handled/has been handled in the past. Value 0 refers to general bias of the concept then
+    //public Dictionary<string, int> actions = new Dictionary<string, int>();
+    //public Dictionary<string, int> contexts = new Dictionary<string, int>();
+    //Dictionary<string, Dictionary<string, int>> entities = new Dictionary<string, Dictionary<string, int>>();//All people and groups in the game. Ideas of types of people count to: Friends, Enemies, Etc.
+    //Dictionary<string, Dictionary<string, int>> actions = new Dictionary<string, Dictionary<string, int>>();//Manner in which the entity-concept relationship is handled/has been handled in the past. Value 0 refers to general bias of the concept then
 
     public override void _Ready() {
         // Create our world
         world = (WorldStates)GetNode("../WorldStates");
-        classifyWorld();
+        //classifyWorld();
     }
     public WorldStates GetWorld() {
 
         return world;
     }
+}
+    /*public void classifyWorld(){
+        addAction("Let Be"); //Actions must be unambigous and related to goals
+        addAction("Pressure"); //So regardless whether Agent understand what stealing is, Borrowing a pen and Stealing a pen are the same action/goal.
+                                //These behaviors may be dynamically built rather than pre-written: "How to take pen without consequences, Solution = Don't tell."
+        addContext("General");//I feel context is lacking... without being able to take into account the specific state of the subject in context.
+        addContext("Player");//Like don't be honest with person when they're sad for example.
+                            //In that case a context can be changed for subject and a third array can be added for state? lol... But that doesn't record any reasoning as to why, just pre-wired preference.
+    }
+    public void addAction(string act){ 
+        actions.Add(act, actions.Count);
+    }
+    public void addContext(string context){ 
+        contexts.Add(context, contexts.Count);
+    }*/
     // public List<Dictionary<string,object>> filter(List<Dictionary<string, object>> entity, List<string> criteria) {
     //     List<string>[] orderedEnts = new List<string>()[criteria.Count];
     //     List<Dictionary<string,object>> orderedEntities = new List<List<Dictionary<string, object>>>(); 
@@ -32,7 +49,7 @@ public class GWorld : Node {
     //         orderedEntities
     //     }
     // }
-    public void classifyWorld() {
+    /*public void classifyWorld() {
         entities.Add("People", new Dictionary<string, int>());
         entities.Add("Groups", new Dictionary<string, int>());
         entities.Add("Archetypes", new Dictionary<string, int>());
@@ -68,8 +85,7 @@ public class GWorld : Node {
         actions["Sad"].Add("Father", 0);
         actions["Sad"].Add("Mother", 0);
 
-    }
-}
+    }*/
 
 //Removed Code
 /*      

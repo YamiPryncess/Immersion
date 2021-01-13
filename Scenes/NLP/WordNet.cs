@@ -20,7 +20,7 @@ class WordNet : Node {
     WordTrie wordTrie;
     JsonSoft jsonSoft;
     Thread thread;
-    string folderPath = @"C:/Users/zen86/Documents/Godot Game Dev/Projects and Demos/Immersion/Database/EwnData";
+    string folderPath = @"res://Database/EwnData";
     string pathWn;
     string pathEnt;
     string pathSyn;
@@ -46,7 +46,7 @@ class WordNet : Node {
         pathEnt = folderPath + @"/Ewn-Entries.txt";
         pathSyn = folderPath + @"/Ewn-Synsets.txt";
         pathWt = folderPath + @"/Ewn-Trie.txt";
-        loadWordNet();
+        //loadWordNet();
     }
 
     public void createWordNet() {
@@ -192,7 +192,7 @@ class WordNet : Node {
 }
 
 class JsonSoft : Reference {
-    string folderPath = @"C:/Users/zen86/Documents/Godot Game Dev/Projects and Demos/Immersion/Database/WordNet";
+    string folderPath = @"res://Database/WordNet";
     string pathXml;
     string pathJson;
     File file = new File();

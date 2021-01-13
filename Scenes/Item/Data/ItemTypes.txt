@@ -1,3 +1,146 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:c811bb972d1ec62b8a43ac9d2d5eaddabc0e2a331f4adf90e3e1c4c13bd0da34
-size 2601
+{
+  "Pizza": {
+    "id": -1,
+    "container": [],
+    "transform": {
+      "basis": {
+        "Row0": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "Row1": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "Row2": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "x": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "y": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "z": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "Column0": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "Column1": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "Column2": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "Scale": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        }
+      },
+      "origin": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      }
+    },
+    "type": "Pizza",
+    "synset": "ewn-07889783-n",
+    "packed": false,
+    "weight": 0.0,
+    "energyLvl": 0.0,
+    "toxicLvl": 0.0,
+    "digestiveLvl": 0.0,
+    "forceLvl": 0.0,
+    "magneticLvl": 0.0
+  },
+  "Currency": {
+    "id": -1,
+    "container": [],
+    "transform": {
+      "basis": {
+        "Row0": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "Row1": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "Row2": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "x": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "y": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "z": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "Column0": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "Column1": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "Column2": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "Scale": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        }
+      },
+      "origin": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      }
+    },
+    "type": "Currency",
+    "synset": "ewn-13407086-n",
+    "packed": false,
+    "weight": 0.0,
+    "energyLvl": 0.0,
+    "toxicLvl": 0.0,
+    "digestiveLvl": 0.0,
+    "forceLvl": 0.0,
+    "magneticLvl": 0.0
+  }
+}

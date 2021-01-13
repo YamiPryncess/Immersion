@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=2]
+[gd_scene load_steps=19 format=2]
 
 [ext_resource path="res://Scenes/Character/Models/Mannequiny.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Scenes/Character/Character.cs" type="Script" id=2]
@@ -9,23 +9,28 @@
 [ext_resource path="res://Scenes/Character/Agent/Heart.cs" type="Script" id=7]
 [ext_resource path="res://Scenes/Character/Camera/CharCam.cs" type="Script" id=8]
 [ext_resource path="res://Scenes/Character/Interaction/Interaction.cs" type="Script" id=9]
+[ext_resource path="res://Scenes/Character/Interaction/Reflection.cs" type="Script" id=10]
+[ext_resource path="res://Scenes/Character/Camera/Eyes.cs" type="Script" id=11]
+[ext_resource path="res://Scenes/Character/Interaction/PersonalSpace.cs" type="Script" id=12]
 
 [sub_resource type="CapsuleShape" id=1]
 
-[sub_resource type="SpatialMaterial" id=2]
+[sub_resource type="SphereShape" id=2]
+
+[sub_resource type="SpatialMaterial" id=3]
 albedo_color = Color( 0.780392, 0, 1, 1 )
 
-[sub_resource type="CylinderMesh" id=3]
-material = SubResource( 2 )
+[sub_resource type="CylinderMesh" id=4]
+material = SubResource( 3 )
 top_radius = 0.25
 bottom_radius = 0.001
 height = 1.0
 radial_segments = 4
 rings = 1
 
-[sub_resource type="AnimationNodeStateMachinePlayback" id=4]
+[sub_resource type="AnimationNodeStateMachinePlayback" id=5]
 
-[sub_resource type="CapsuleShape" id=5]
+[sub_resource type="CapsuleShape" id=6]
 radius = 0.25
 height = 1.25
 
@@ -42,18 +47,29 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.212 )
 keep_aspect = 0
 fov = 120.0
 
+[node name="Eyes" type="RayCast" parent="CharCam"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.474099, 0 )
+script = ExtResource( 11 )
+
 [node name="Movement" type="Node" parent="."]
 script = ExtResource( 6 )
 
 [node name="Interaction" type="Node" parent="."]
 script = ExtResource( 9 )
 
-[node name="InteractionArea" type="Area" parent="Interaction"]
+[node name="PersonalSpace" type="Area" parent="Interaction"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0 )
+script = ExtResource( 12 )
 
-[node name="CollisionShape" type="CollisionShape" parent="Interaction/InteractionArea"]
+[node name="CollisionShape" type="CollisionShape" parent="Interaction/PersonalSpace"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0 )
 shape = SubResource( 1 )
+
+[node name="Reflection" type="Area" parent="Interaction"]
+script = ExtResource( 10 )
+
+[node name="CollisionShape" type="CollisionShape" parent="Interaction/Reflection"]
+shape = SubResource( 2 )
 
 [node name="Navigate" type="Node" parent="."]
 script = ExtResource( 5 )
@@ -61,7 +77,7 @@ script = ExtResource( 5 )
 [node name="Tracker" type="MeshInstance" parent="Navigate"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -3 )
 visible = false
-mesh = SubResource( 3 )
+mesh = SubResource( 4 )
 skeleton = NodePath("")
 material/0 = null
 
@@ -82,13 +98,15 @@ script = null
 
 [node name="AnimationTree" parent="Mannequiny" index="2"]
 active = true
-parameters/playback = SubResource( 4 )
+parameters/playback = SubResource( 5 )
 
-[node name="CollisionPolygon" type="CollisionShape" parent="."]
+[node name="BodyCollision" type="CollisionShape" parent="."]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0.875, 0 )
-shape = SubResource( 5 )
+shape = SubResource( 6 )
 
 [node name="Timer" type="Timer" parent="."]
+[connection signal="body_entered" from="Interaction/PersonalSpace" to="Interaction/PersonalSpace" method="_on_Body_Entered"]
+[connection signal="body_exited" from="Interaction/PersonalSpace" to="Interaction/PersonalSpace" method="_on_Body_Exited"]
 [connection signal="timeout" from="Timer" to="GAgent" method="_on_Timer_timeout"]
 
 [editable path="Mannequiny"]

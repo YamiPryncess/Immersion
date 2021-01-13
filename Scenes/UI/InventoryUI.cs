@@ -18,9 +18,9 @@ public class InventoryUI : Node {
         foreach(Label child in grid.GetChildren()){
             child.QueueFree();
         }
-        foreach(KeyValuePair<string, ItemCore> item in character.inventory) {
+        foreach(KeyValuePair<int, ItemCore> item in character.inventory) {
             Label label = new Label();
-            label.Text = item.Value.type;
+            label.Text = item.Value.type+" "+ item.Value;
             AddChild(label);
         }
         /*foreach(Label child in grid.GetChildren()){
