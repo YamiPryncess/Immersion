@@ -54,7 +54,7 @@ script = ExtResource( 11 )
 [node name="Movement" type="Node" parent="."]
 script = ExtResource( 6 )
 
-[node name="Interaction" type="Node" parent="."]
+[node name="Interaction" type="Spatial" parent="."]
 script = ExtResource( 9 )
 
 [node name="PersonalSpace" type="Area" parent="Interaction"]

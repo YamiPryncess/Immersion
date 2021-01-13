@@ -68,6 +68,9 @@ script = ExtResource( 15 )
 [node name="Pizza" parent="NavWorld/Treasury" instance=ExtResource( 10 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.64, 0 )
 
+[node name="MeshInstance" parent="NavWorld/Treasury/Pizza" index="1"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.390537, 0 )
+
 [node name="FlatPlanes" type="NavigationMeshInstance" parent="NavWorld"]
 navmesh = SubResource( 1 )
 
@@ -146,7 +149,7 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.31293, 0.347536, 0.372441 )
 collision_layer = 1
 
 [node name="Alexia" parent="NavWorld" instance=ExtResource( 3 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.04535, 0.627925, -0.438894 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.04535, 0.627926, -0.438894 )
 collision_layer = 2
 collision_mask = 3
 fullName = "AlexiaValentine"
@@ -156,7 +159,7 @@ playState = 0
 environment = SubResource( 11 )
 
 [node name="OmniLight" type="OmniLight" parent="WorldLight"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.80862, 4.63734, 0.582563 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 14.1301, 4.63734, 0.582563 )
 light_specular = 0.0
 
 [node name="LightArea" type="Area" parent="WorldLight/OmniLight"]
@@ -166,7 +169,7 @@ script = ExtResource( 16 )
 shape = SubResource( 12 )
 
 [node name="DirectionalLight" type="DirectionalLight" parent="WorldLight"]
-transform = Transform( 0.707107, 0.408248, -0.57735, 0, 0.816497, 0.57735, 0.707107, -0.408248, 0.57735, -1.38166, 3.58666, 3.22866 )
+transform = Transform( 0.707107, 0.408248, -0.57735, 0, 0.816497, 0.57735, 0.707107, -0.408248, 0.57735, -1.38166, 3.58666, 8.5536 )
 
 [node name="AI" type="Node" parent="."]
 script = ExtResource( 12 )
@@ -515,3 +518,5 @@ script = ExtResource( 1 )
 [connection signal="text_changed" from="UI/PlayerLine" to="UI" method="_on_PlayerLine_text_changed"]
 [connection signal="text_entered" from="UI/PlayerLine" to="UI" method="_on_PlayerLine_text_entered"]
 [connection signal="pressed" from="UI/PlayerLine/Keyboard/KeyGrid/Aa" to="UI" method="_on_Key_pressed"]
+
+[editable path="NavWorld/Treasury/Pizza"]

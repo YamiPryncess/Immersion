@@ -28,7 +28,7 @@ public class PersonalSpace : Area
         }
     }
     public void input(float delta){
-        if(Input.IsActionJustPressed("Interact") && collided.Count > 0) {
+        if(Input.IsActionJustPressed("interact") && collided.Count > 0) {
             foreach(KeyValuePair<int,Item> col in collided){
                 GD.Print("Interacting with item: ", collided[col.Value.info.id].info.type);
                 character.inventory.Add(col.Key, col.Value.info);

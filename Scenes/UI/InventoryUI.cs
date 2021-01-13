@@ -21,7 +21,7 @@ public class InventoryUI : Node {
         foreach(KeyValuePair<int, ItemCore> item in character.inventory) {
             Label label = new Label();
             label.Text = item.Value.type+" "+ item.Value;
-            AddChild(label);
+            grid.AddChild(label);
         }
         /*foreach(Label child in grid.GetChildren()){
             child.GetGlobalTransform();

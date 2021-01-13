@@ -191,7 +191,7 @@ public class UI : Control {
 
     //Process Input Map -> Finishing Input Handler
     public void input(){
-        if (Input.IsActionJustPressed("ui_accept")){
+        if (Input.IsActionJustPressed("enter")){
             playerLine.GrabFocus();
             if(master.player.playState != Character.PLAYSTATE.TEXT) {
                 master.player.playState = Character.PLAYSTATE.TEXT;
