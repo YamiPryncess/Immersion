@@ -13,10 +13,11 @@ public class Character : KinematicBody {
     [Export] public string fullName = "LynnCelestine";
     public AnimationTree animationTree;
     public AnimationNodeStateMachinePlayback stateMachine;
-    public CharCam camera;
+    public Vision camera;
     public Movement movement;
     public Navigate navigate;
     public GAgent GAgent;
+    public NotifSprite notifSprite;
     public List<Observation> observations = new List<Observation>();
     public float horizontalFov = 210;
     public float verticalFov = 150;
@@ -34,7 +35,7 @@ public class Character : KinematicBody {
     public Vector3 velocity = Vector3.Zero;
     //public float mouseSensitivity = 0.3f;
     public bool isMoving = false;
-    public enum PLAYSTATE { NAV, PHYSICS, TEXT }
+    public enum PLAYSTATE { NAV, PHYSICS, TEXT, OBSERVE }
     [Export] public PLAYSTATE playState = PLAYSTATE.PHYSICS;
     public enum NAVSTATE { TRACKER, FOLLOW }
     [Export] public NAVSTATE navState = NAVSTATE.FOLLOW;
@@ -42,10 +43,11 @@ public class Character : KinematicBody {
     //=============GODOT VIRTUALS================
     public override void _Ready() {
         master = GetTree().Root.GetNode<Master>("Master");
-        camera = GetNode<CharCam>("CharCam");
+        camera = GetNode<Vision>("Vision");
         movement = GetNode<Movement>("Movement");
         navigate = GetNode<Navigate>("Navigate");
         GAgent = GetNode<GAgent>("GAgent");
+        notifSprite = GetNode<NotifSprite>("Interaction/NotifSprite");
         mannequiny = (Spatial)GetNode("Mannequiny");animationTree = (AnimationTree)GetNode("Mannequiny/AnimationTree");
         stateMachine = (AnimationNodeStateMachinePlayback)animationTree.Get("parameters/playback");
         if(playState == PLAYSTATE.PHYSICS && master.player == null) {
@@ -59,9 +61,9 @@ public class Character : KinematicBody {
         }
     }
     
-    public override void _PhysicsProcess(float delta){ 
+    public override void _PhysicsProcess(float delta){
         frame++;
-        if(frame > 30){
+        if(frame > 100000){
             frame = 0;
         }
         if (playState == PLAYSTATE.NAV) {
@@ -83,17 +85,22 @@ public class Character : KinematicBody {
     public bool wouldSee(float degreesH, float degreesV, float distance, int moveRating, int contrast) {
         int interest = 1; //Light is already established
         int camoRating = moveRating - contrast; //1-10 grade, (10 move = fast) - (10 contrast = invisible)
+        if(camoRating < 1) camoRating = 1;
+        //GD.Print(fullName, "degreesH: ", degreesH, "degreesV: ", degreesV, "distance to: ", distance);
         if(degreesH < 30 && degreesV < 30) interest = 10;
         else if(degreesH < 60 && degreesV < 60) interest = 8;
         else if(degreesH < 90 && degreesV < 90) interest = 6;
         else if(degreesH < 180 && degreesV < 150) interest = 4;
         else if(degreesH < 210 && degreesV < 150) interest = 2;
+        else interest = 0;
         interest = interest * camoRating * 60; //100 * 60 = 6000 (3 Miles) = 3 * 20 blocks * 100 vector units
-        if(interest > distance) return true; //NightVision and Scopes would see everything
+        //GD.Print(interest, " ", distance);
+        if(interest >= distance) return true; //NightVision and Scopes would see everything
         return false;
     }//This is for calculating the info. It won't be needed if it passes.
     public void receiveVisual(Godot.Object obj, float degreesH, float degreesV, float distance, int moveRating, int contrast) {
-
+        if(degreesH < 30 && degreesV < 30) notifSprite.presentNotif("Exclamation");
+        else if(degreesH < 210 && degreesV < 180) notifSprite.presentNotif("Question");
     }//This is for reacting to the info with A.I. Bright guy overthere! I see movement... Hey! He's there!
     public void receiveDamage() {
 

@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public class CharCam : Spatial {
+public class Vision : RayCast {
     
     public float cameraXAngle = 0;
     public Camera fpCamera;
@@ -9,6 +9,7 @@ public class CharCam : Spatial {
     public override void _Ready() {
         fpCamera = (Camera)GetNode("FirstPerson");
         character = GetParent<Character>();
+        ExcludeParent = true;
     }
     public void camera(float delta){
         Vector2 arrowKeys = new Vector2(Input.GetActionStrength("look_right") - Input.GetActionStrength("look_left"),
@@ -19,6 +20,16 @@ public class CharCam : Spatial {
             RotateX(Mathf.Deg2Rad(change));
             cameraXAngle += change;
         }
+    }
+    public bool look(Character target) { //May be updated to return a limb count in the future.
+        CastTo = target.GlobalTransform.origin - GlobalTransform.origin;
+        ForceRaycastUpdate();
+        if(IsColliding() && GetCollider() is Character colTarget) {
+            if(colTarget.fullName == target.fullName) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

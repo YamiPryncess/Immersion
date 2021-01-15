@@ -17,13 +17,13 @@ public class PersonalSpace : Area
     public void _on_Body_Entered(PhysicsBody _item){
         if(_item is Item item) {
             collided.Add(item.info.id, item);
-            GD.Print("Colliding with item: ", collided[item.info.id].info.type);
+            //GD.Print("Colliding with item: ", collided[item.info.id].info.type);
             //For some reason it collides twice with pizza and then never exits or allows me to interact.
         }//Will finish working on this tomorrow.
     }
     public void _on_Body_Exited(PhysicsBody _item){
         if(_item is Item item) {
-            GD.Print("Exiting Collision of: ", collided[item.info.id].info.type);
+            //GD.Print("Exiting Collision of: ", collided[item.info.id].info.type);
             collided.Remove(item.info.id);
         }
     }

@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=2]
+[gd_scene load_steps=21 format=2]
 
 [ext_resource path="res://Scenes/Character/Models/Mannequiny.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Scenes/Character/Character.cs" type="Script" id=2]
@@ -7,11 +7,13 @@
 [ext_resource path="res://Scenes/Character/Physics/Navigate.cs" type="Script" id=5]
 [ext_resource path="res://Scenes/Character/Physics/Movement.cs" type="Script" id=6]
 [ext_resource path="res://Scenes/Character/Agent/Heart.cs" type="Script" id=7]
-[ext_resource path="res://Scenes/Character/Camera/CharCam.cs" type="Script" id=8]
+[ext_resource path="res://Scenes/Character/Camera/Vision.cs" type="Script" id=8]
 [ext_resource path="res://Scenes/Character/Interaction/Interaction.cs" type="Script" id=9]
 [ext_resource path="res://Scenes/Character/Interaction/Reflection.cs" type="Script" id=10]
-[ext_resource path="res://Scenes/Character/Camera/Eyes.cs" type="Script" id=11]
 [ext_resource path="res://Scenes/Character/Interaction/PersonalSpace.cs" type="Script" id=12]
+[ext_resource path="res://Assets/Exclamation_Mark.png" type="Texture" id=13]
+[ext_resource path="res://Assets/Question_Mark.png" type="Texture" id=14]
+[ext_resource path="res://Scenes/Character/NotifSprite.cs" type="Script" id=15]
 
 [sub_resource type="CapsuleShape" id=1]
 
@@ -35,21 +37,17 @@ radius = 0.25
 height = 1.25
 
 [node name="Character" type="KinematicBody"]
-collision_layer = 3
+collision_layer = 19
 script = ExtResource( 2 )
 
-[node name="CharCam" type="Spatial" parent="."]
+[node name="Vision" type="RayCast" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.631, 0 )
 script = ExtResource( 8 )
 
-[node name="FirstPerson" type="Camera" parent="CharCam"]
+[node name="FirstPerson" type="Camera" parent="Vision"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.212 )
 keep_aspect = 0
 fov = 120.0
-
-[node name="Eyes" type="RayCast" parent="CharCam"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.474099, 0 )
-script = ExtResource( 11 )
 
 [node name="Movement" type="Node" parent="."]
 script = ExtResource( 6 )
@@ -59,6 +57,7 @@ script = ExtResource( 9 )
 
 [node name="PersonalSpace" type="Area" parent="Interaction"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0 )
+collision_mask = 9
 script = ExtResource( 12 )
 
 [node name="CollisionShape" type="CollisionShape" parent="Interaction/PersonalSpace"]
@@ -67,9 +66,23 @@ shape = SubResource( 1 )
 
 [node name="Reflection" type="Area" parent="Interaction"]
 script = ExtResource( 10 )
+lightRating = 10
+moveRating = 10
 
 [node name="CollisionShape" type="CollisionShape" parent="Interaction/Reflection"]
 shape = SubResource( 2 )
+
+[node name="NotifSprite" type="Spatial" parent="Interaction"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.87743, 0 )
+script = ExtResource( 15 )
+
+[node name="Exclamation" type="Sprite3D" parent="Interaction/NotifSprite"]
+visible = false
+texture = ExtResource( 13 )
+
+[node name="Question" type="Sprite3D" parent="Interaction/NotifSprite"]
+visible = false
+texture = ExtResource( 14 )
 
 [node name="Navigate" type="Node" parent="."]
 script = ExtResource( 5 )
@@ -107,6 +120,8 @@ shape = SubResource( 6 )
 [node name="Timer" type="Timer" parent="."]
 [connection signal="body_entered" from="Interaction/PersonalSpace" to="Interaction/PersonalSpace" method="_on_Body_Entered"]
 [connection signal="body_exited" from="Interaction/PersonalSpace" to="Interaction/PersonalSpace" method="_on_Body_Exited"]
+[connection signal="body_entered" from="Interaction/Reflection" to="Interaction/Reflection" method="_on_Body_Entered"]
+[connection signal="body_exited" from="Interaction/Reflection" to="Interaction/Reflection" method="_on_Body_Exited"]
 [connection signal="timeout" from="Timer" to="GAgent" method="_on_Timer_timeout"]
 
 [editable path="Mannequiny"]

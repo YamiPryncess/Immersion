@@ -68,9 +68,6 @@ script = ExtResource( 15 )
 [node name="Pizza" parent="NavWorld/Treasury" instance=ExtResource( 10 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.64, 0 )
 
-[node name="MeshInstance" parent="NavWorld/Treasury/Pizza" index="1"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.390537, 0 )
-
 [node name="FlatPlanes" type="NavigationMeshInstance" parent="NavWorld"]
 navmesh = SubResource( 1 )
 
@@ -146,14 +143,11 @@ shape = SubResource( 10 )
 
 [node name="Lynn" parent="NavWorld" instance=ExtResource( 3 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.31293, 0.347536, 0.372441 )
-collision_layer = 1
 
 [node name="Alexia" parent="NavWorld" instance=ExtResource( 3 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.04535, 0.627926, -0.438894 )
-collision_layer = 2
-collision_mask = 3
 fullName = "AlexiaValentine"
-playState = 0
+playState = 3
 
 [node name="WorldLight" type="WorldEnvironment" parent="."]
 environment = SubResource( 11 )

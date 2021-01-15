@@ -5,7 +5,7 @@ public class Movement : Node {
     Camera fpCamera;
     Character character;
     public override void _Ready() {
-        fpCamera = GetNode<Camera>("../CharCam/FirstPerson");
+        fpCamera = GetNode<Camera>("../Vision/FirstPerson");
         character = GetParent<Character>();
     }
 

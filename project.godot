@@ -178,6 +178,9 @@ enter={
 
 3d_render/layer_1="Character"
 3d_render/layer_2="First Person Camera"
+3d_render/layer_3="Light"
+3d_render/layer_4="Items"
+3d_render/Items=false
 
 [mono]
 

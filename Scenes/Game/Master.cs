@@ -32,18 +32,18 @@ public class Master : Node {
 
 public static class Math {
     public static float[] fieldOfVision(Vector3 observer, Vector3 facing, Vector3 observed) {
-            Vector2 eyesHFOV = new Vector2(observer.x, observer.y);
+            Vector2 eyesHFOV = new Vector2(observer.x, observer.z);
             Vector2 eyesVFOV = new Vector2(observer.z, observer.y);
             
-            Vector2 facingH = new Vector2(facing.x, facing.y);
+            Vector2 facingH = new Vector2(facing.x, facing.z);
             Vector2 facingV = new Vector2(facing.z, facing.y);
             
-            Vector2 observedH = new Vector2(observed.x, observed.y);
+            Vector2 observedH = new Vector2(observed.x, observed.z);
             Vector2 observedV = new Vector2(observed.z, observed.y);
 
             float horizontal = Mathf.Acos((observedH - eyesHFOV).Normalized().Dot(facingH));
             float vertical = Mathf.Acos((observedV - eyesVFOV).Normalized().Dot(facingV));
-
+            
             return new float[]{Mathf.Rad2Deg(horizontal), Mathf.Rad2Deg(vertical)};
     }
 }
