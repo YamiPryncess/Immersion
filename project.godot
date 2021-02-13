@@ -52,6 +52,10 @@ config/icon="res://icon.png"
 
 window/stretch/aspect="keep"
 
+[editor_plugins]
+
+enabled=PoolStringArray( "scatter" )
+
 [gdnative]
 
 singletons=[  ]

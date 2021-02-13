@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=2]
+[gd_scene load_steps=34 format=2]
 
 [ext_resource path="res://Scenes/UI/WordTrie.cs" type="Script" id=1]
 [ext_resource path="res://Scenes/UI/UI.cs" type="Script" id=2]
@@ -16,6 +16,14 @@
 [ext_resource path="res://Scenes/NLP/WordNet.cs" type="Script" id=14]
 [ext_resource path="res://Scenes/Item/Treasury.cs" type="Script" id=15]
 [ext_resource path="res://Scenes/Item/LightArea.cs" type="Script" id=16]
+[ext_resource path="res://addons/scatter/src/core/scatter.gd" type="Script" id=17]
+[ext_resource path="res://addons/scatter/src/core/scatter_item.gd" type="Script" id=18]
+
+[sub_resource type="Curve3D" id=15]
+_data = {
+"points": PoolVector3Array(  ),
+"tilts": PoolRealArray(  )
+}
 
 [sub_resource type="NavigationMesh" id=1]
 vertices = PoolVector3Array( -18.4, 0.4, -24.4, -24.4, 0.4, -24.4, -24.4, 0.4, -12.4, -12.1, 0.4, -24.4, -18.4, 0.4, -24.4, -24.4, 0.4, -12.4, -24.4, 0.4, -6.4, -24.4, 0.4, -0.0999985, -1, 0.4, -0.0999985, -0.699999, 0.4, -1, -6.1, 0.4, -24.4, -12.1, 0.4, -24.4, -24.4, 0.4, -6.4, -0.699999, 0.4, -1, 0.200001, 0.4, -1, 0.200001, 0.4, -24.4, -6.1, 0.4, -24.4, 24.5, 0.4, -12.4, 24.5, 0.4, -24.4, 18.2, 0.4, -24.4, 24.5, 0.4, -12.4, 18.2, 0.4, -24.4, 12.2, 0.4, -24.4, 24.5, 0.4, -6.4, 0.800001, 0.4, -1, 1.1, 0.4, -0.0999985, 24.5, 0.4, -0.0999985, 24.5, 0.4, -6.4, 12.2, 0.4, -24.4, 0.200001, 0.4, -24.4, 0.200001, 0.4, -24.4, 0.200001, 0.4, -1, 0.800001, 0.4, -1, -24.4, 0.4, 18.2, -24.4, 0.4, 24.5, -18.4, 0.4, 24.5, -24.4, 0.4, 12.2, -24.4, 0.4, 18.2, -18.4, 0.4, 24.5, -12.1, 0.4, 24.5, 0.200001, 0.4, 24.5, 0.200001, 0.4, 1.1, -1, 0.4, 0.800001, -24.4, 0.4, 5.9, -24.4, 0.4, 12.2, -6.1, 0.4, 24.5, -24.4, 0.4, 12.2, -12.1, 0.4, 24.5, -6.1, 0.4, 24.5, -1, 0.4, 0.800001, -1, 0.4, -0.0999985, -24.4, 0.4, -0.0999985, -24.4, 0.4, 5.9, 18.2, 0.4, 24.5, 24.5, 0.4, 24.5, 24.5, 0.4, 18.2, 12.2, 0.4, 24.5, 18.2, 0.4, 24.5, 24.5, 0.4, 18.2, 24.5, 0.4, 12.2, 1.1, 0.4, 0.800001, 0.200001, 0.4, 1.1, 0.200001, 0.4, 24.5, 12.2, 0.4, 24.5, 24.5, 0.4, 5.9, 24.5, 0.4, -0.0999985, 12.2, 0.4, 24.5, 24.5, 0.4, 12.2, 24.5, 0.4, 5.9, 24.5, 0.4, -0.0999985, 1.1, 0.4, -0.0999985, 1.1, 0.4, 0.800001 )
@@ -67,6 +75,33 @@ script = ExtResource( 15 )
 
 [node name="Pizza" parent="NavWorld/Treasury" instance=ExtResource( 10 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.64, 0 )
+
+[node name="Scatter" type="Path" parent="NavWorld"]
+curve = SubResource( 15 )
+script = ExtResource( 17 )
+bake_interval = 1.0
+global_seed = 0
+use_instancing = true
+disable_updates_in_game = true
+modifier_stack = Object(Node,"_import_path":NodePath(""),"pause_mode":0,"process_priority":0,"script":Resource( "res://addons/scatter/src/core/modifier_stack.gd" ),"stack":[ Object(Node,"_import_path":NodePath(""),"pause_mode":0,"process_priority":0,"script":Resource( "res://addons/scatter/src/modifiers/distribute_inside_random.gd" ),"enabled":true,"display_name":"Distribute Inside (Random)","warning":"The Scatter node 3D curve is empty.
+		You can draw one using the controls on top of the viewport.","warning_ignore_no_transforms":true,"override_global_seed":false,"custom_seed":0.0,"instance_count":100.0,"_rng":null)
+, Object(Node,"_import_path":NodePath(""),"pause_mode":0,"process_priority":0,"script":Resource( "res://addons/scatter/src/modifiers/randomize_transforms.gd" ),"enabled":true,"display_name":"Randomize Transforms","warning":"The Scatter node 3D curve is empty.
+		You can draw one using the controls on top of the viewport.","warning_ignore_no_transforms":false,"override_global_seed":false,"custom_seed":0,"local_space":true,"position":Vector3( 1, 0, 1 ),"rotation":Vector3( 0, 360, 0 ),"scale":Vector3( 1, 1, 1 ),"_rng":null)
+, Object(Node,"_import_path":NodePath(""),"pause_mode":0,"process_priority":0,"script":Resource( "res://addons/scatter/src/modifiers/project_on_floor.gd" ),"enabled":true,"display_name":"Project On Floor","warning":"The Scatter node 3D curve is empty.
+		You can draw one using the controls on top of the viewport.","warning_ignore_no_transforms":false,"ray_length":10.0,"ray_offset":4.0,"remove_points_on_miss":true,"align_with_floor_normal":false,"invert_ray_direction":false,"floor_direction":Vector3( 0, -1, 0 ))
+ ],"just_created":false,"undo_redo":Object(UndoRedo,"script":null)
+)
+
+
+[node name="ScatterItem" type="Spatial" parent="NavWorld/Scatter"]
+script = ExtResource( 18 )
+proportion = 100
+local_item_path = NodePath("")
+item_path = ""
+scale_modifier = 1.0
+ignore_initial_position = true
+ignore_initial_rotation = true
+ignore_initial_scale = true
 
 [node name="FlatPlanes" type="NavigationMeshInstance" parent="NavWorld"]
 navmesh = SubResource( 1 )
